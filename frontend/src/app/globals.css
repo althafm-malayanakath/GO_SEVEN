@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #7A1FA2;
+  --color-primary-light: #9C27B0;
+  --color-primary-dark: #5A0E7A;
+  --color-accent: #F1DEFF;
+  --color-dark: #24073A;
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+:root {
+  --background: #5A0E7A;
+  --foreground: #ffffff;
+  --primary: #7A1FA2;
+  --accent: #F1DEFF;
+  --brand-bg-main: linear-gradient(135deg, #5A0E7A 0%, #7A1FA2 52%, #9C27B0 100%);
+  color-scheme: light;
+}
+
+body {
+  background: var(--brand-bg-main);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  background-attachment: fixed;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 8px 30px 0 rgba(90, 14, 122, 0.35);
+}
+
+/* Futuristic Gradients */
+.bg-purple-gradient {
+  background: var(--brand-bg-main);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #f1deff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
