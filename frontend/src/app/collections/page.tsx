@@ -199,7 +199,7 @@ function CollectionsContent() {
 
         {/* Products grid */}
         {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid auto-rows-[1fr] grid-cols-2 gap-6 lg:grid-cols-4">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="h-72 rounded-2xl bg-white/14 animate-pulse" />
             ))}
@@ -207,7 +207,7 @@ function CollectionsContent() {
         ) : filtered.length > 0 ? (
           <motion.div
             layout
-            className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid auto-rows-[1fr] grid-cols-2 gap-6 lg:grid-cols-4"
           >
             {filtered.map((p, i) => (
               <motion.div
@@ -215,6 +215,7 @@ function CollectionsContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
+                className="h-full"
               >
                 <ProductCard product={p} />
               </motion.div>

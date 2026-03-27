@@ -1,8 +1,13 @@
 import { clearStoredAuth, getStoredToken } from './authStorage';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const RETRYABLE_STATUSES = new Set([500, 502, 503, 504]);
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const method = (options?.method || 'GET').toUpperCase();
+  const maxAttempts = method === 'GET' ? 3 : 1;
   const token = getStoredToken();
   const headers = new Headers(options?.headers);
   const isFormDataBody = typeof FormData !== 'undefined' && options?.body instanceof FormData;
@@ -15,19 +20,46 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    headers,
-    ...options,
-  });
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    if (res.status === 401) {
-      clearStoredAuth();
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const res = await fetch(`${API_URL}${path}`, {
+        headers,
+        cache: method === 'GET' ? 'no-store' : options?.cache,
+        ...options,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+
+        if (res.status === 401) {
+          clearStoredAuth();
+        }
+
+        const requestError = new Error(err.message || 'Request failed');
+
+        if (attempt < maxAttempts && RETRYABLE_STATUSES.has(res.status)) {
+          lastError = requestError;
+          await sleep(700 * attempt);
+          continue;
+        }
+
+        throw requestError;
+      }
+
+      return res.json();
+    } catch (error) {
+      if (attempt >= maxAttempts) {
+        throw error;
+      }
+
+      lastError = error instanceof Error ? error : new Error('Request failed');
+      await sleep(700 * attempt);
     }
-    throw new Error(err.message || 'Request failed');
   }
-  return res.json();
+
+  throw lastError || new Error('Request failed');
 }
 
 function buildQuery(params?: ProductQuery) {

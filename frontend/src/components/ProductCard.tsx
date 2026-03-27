@@ -26,7 +26,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const slideshowRef = useRef<number | null>(null);
 
-  // Tilt motion values
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const rotateX = useSpring(useTransform(rawY, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
@@ -85,18 +84,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 800 }}
-      className="group bg-white text-black border border-purple-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-300"
+      className="group relative flex h-full min-h-[31rem] flex-col overflow-hidden rounded-2xl border border-purple-200/80 bg-white text-black shadow-sm transition-shadow duration-300 hover:shadow-2xl sm:min-h-[33rem]"
     >
-      {/* Glare sheen */}
       <motion.div
-        className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: glowBg }}
       />
 
       <motion.div
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         whileTap={{ scale: 0.98 }}
-        className="relative h-64 sm:h-72 overflow-hidden"
+        className="relative h-64 overflow-hidden sm:h-72"
       >
         <Link
           href={`/product/${product._id}/preview`}
@@ -134,11 +132,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </Link>
 
-        <div className="pointer-events-none absolute inset-0 hidden items-center justify-center gap-4 bg-black/30 opacity-0 transition-opacity duration-300 lg:flex lg:group-hover:opacity-100 z-30">
+        <div className="pointer-events-none absolute inset-0 z-30 hidden items-center justify-center gap-4 bg-black/30 opacity-0 transition-opacity duration-300 lg:flex lg:group-hover:opacity-100">
           <button
             onClick={handleAddToCart}
             aria-label={`Add ${product.name} to cart`}
-            className={`pointer-events-auto p-3 rounded-full shadow-lg transform transition-all active:scale-90 ${
+            className={`pointer-events-auto rounded-full p-3 shadow-lg transition-all active:scale-90 ${
               added ? 'bg-green-500 text-white' : 'bg-white text-primary hover:bg-primary hover:text-white'
             }`}
           >
@@ -147,13 +145,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <Link
             href={`/product/${product._id}/preview`}
             aria-label={`Preview ${product.name}`}
-            className="pointer-events-auto bg-white text-primary p-3 rounded-full shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90"
+            className="pointer-events-auto rounded-full bg-white p-3 text-primary shadow-lg transition-all active:scale-90 hover:bg-primary hover:text-white"
           >
             <Eye size={20} />
           </Link>
         </div>
 
-        <div className="absolute bottom-3 right-3 flex items-center gap-2 lg:hidden z-30">
+        <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2 lg:hidden">
           <Link
             href={`/product/${product._id}/preview`}
             aria-label={`Preview ${product.name}`}
@@ -172,75 +170,87 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </button>
         </div>
 
-        {/* Badge stickers */}
-        <div className="absolute top-3 left-3 flex gap-2 flex-wrap z-20">
-          <span className="backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-primary uppercase tracking-wider bg-white/90 shadow-sm">
+        <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-2">
+          <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm backdrop-blur-md">
             {product.category}
           </span>
           {product.isNewArrival && (
-            <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white bg-primary shadow-sm">
+            <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-white shadow-sm">
               NEW
             </span>
           )}
           {discountActive && (
-            <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white bg-red-500 shadow-sm">
+            <span className="rounded-full bg-red-500 px-3 py-1 text-[10px] font-bold text-white shadow-sm">
               {product.discount}% OFF
             </span>
           )}
         </div>
       </motion.div>
 
-      {/* Info */}
-      <div className="p-6">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         <Link href={`/product/${product._id}/preview`} className="inline-block">
-          <h3 className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+          <h3 className="min-h-[3.5rem] text-lg font-bold leading-tight transition-colors line-clamp-2 group-hover:text-primary">
+            {product.name}
+          </h3>
         </Link>
-        {/* Sizes */}
-        {product.sizes.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2 mb-2">
-            {product.sizes.map((s) => (
-              <button
-                key={s}
-                onClick={(e) => { e.preventDefault(); setSelectedSize(s); }}
-                className={`text-xs font-semibold px-3 py-1 rounded-md border transition-colors ${
-                  selectedSize === s
-                    ? 'border-primary bg-primary text-white'
-                    : 'border-purple-200 text-black/60 hover:border-primary'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
-        {/* Colors */}
-        {product.colors?.length > 0 && (
-          <div className="flex gap-2 mb-3">
-            {product.colors.map((c) => (
-              <button
-                key={c.name}
-                title={c.name}
-                onClick={(e) => { e.preventDefault(); setSelectedColor(c.name); }}
-                className={`w-5 h-5 rounded-full border-2 transition-all ${
-                  selectedColor === c.name ? 'border-primary scale-125' : 'border-purple-200'
-                }`}
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
-          </div>
-        )}
-        <div className="flex justify-between items-center">
-          <div>
+
+        <div className="mt-3 min-h-[6rem]">
+          {product.sizes.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {product.sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedSize(size);
+                  }}
+                  className={`rounded-md border px-3 py-1 text-xs font-semibold transition-colors ${
+                    selectedSize === size
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-purple-200 text-black/60 hover:border-primary'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3 min-h-[1.75rem]">
+          {product.colors?.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {product.colors.map((color) => (
+                <button
+                  key={color.name}
+                  title={color.name}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedColor(color.name);
+                  }}
+                  className={`h-5 w-5 rounded-full border-2 transition-all ${
+                    selectedColor === color.name ? 'scale-125 border-primary' : 'border-purple-200'
+                  }`}
+                  style={{ backgroundColor: color.hex }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-auto flex min-h-[4.75rem] items-end justify-between gap-3 pt-4">
+          <div className="min-h-[4.75rem]">
             {discountActive ? (
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-extrabold text-red-500">{formatPrice(getEffectivePrice(product))}</span>
-                <span className="text-sm line-through text-black/40">{formatPrice(product.price)}</span>
+                <span className="text-sm text-black/40 line-through">{formatPrice(product.price)}</span>
               </div>
             ) : (
               <span className="text-xl font-extrabold text-primary">{formatPrice(product.price)}</span>
             )}
+
             {discountActive && product.discountEndsAt && (
-              <div className="flex items-center gap-1 mt-0.5">
+              <div className="mt-0.5 flex items-center gap-1">
                 <span className="text-xs text-black/50">Ends in</span>
                 <CountdownTimer
                   endsAt={product.discountEndsAt}
@@ -250,8 +260,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-yellow-400">★</span>
+
+          <div className="flex items-center gap-1 self-end pb-1">
+            <span aria-hidden="true" className="text-yellow-400">&#9733;</span>
             <span className="text-sm font-medium">{product.rating}</span>
             <span className="text-xs text-black/40">({product.numReviews})</span>
           </div>

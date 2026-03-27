@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import SiteFooter from "@/components/SiteFooter";
 import WhatsAppContactButton from "@/components/WhatsAppContactButton";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -22,6 +23,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Go Seven - Premium Streetwear",
   description: "Elevate your style with Go Seven's exclusive collection of premium streetwear and fashion.",
+  icons: {
+    icon: "/tab-icon.svg",
+    shortcut: "/tab-icon.svg",
+    apple: "/tab-icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -43,6 +49,7 @@ export default function RootLayout({
                 <WhatsAppContactButton />
               </Suspense>
               <main className="min-h-screen text-white">{children}</main>
+              <SiteFooter />
             </CartProvider>
           </SettingsProvider>
         </AuthProvider>
