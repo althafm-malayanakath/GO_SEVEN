@@ -1,4 +1,5 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -34,7 +35,9 @@ export default function RootLayout({
         <AuthProvider>
           <SettingsProvider>
             <CartProvider>
-              <Navbar />
+              <Suspense fallback={null}>
+                <Navbar />
+              </Suspense>
               <main className="min-h-screen text-white">{children}</main>
             </CartProvider>
           </SettingsProvider>
@@ -43,4 +46,3 @@ export default function RootLayout({
     </html>
   );
 }
-

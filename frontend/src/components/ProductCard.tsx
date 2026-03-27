@@ -98,41 +98,47 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         whileTap={{ scale: 0.98 }}
         className="relative h-64 sm:h-72 overflow-hidden"
       >
-        {product.images.length > 0 ? (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${product.images[activeImage]?.url || 'fallback'}-${activeImage}`}
-              initial={{ opacity: 0, scale: 1 }}
-              animate={{ opacity: 1, scale: 1.05 }}
-              exit={{ opacity: 0, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={product.images[activeImage]?.url || 'https://placehold.co/600x700/6A0DAD/ffffff?text=Go+Seven'}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                className="object-cover"
-                priority={activeImage === 0}
-              />
-            </motion.div>
-          </AnimatePresence>
-        ) : (
-          <Image
-            src="https://placehold.co/600x700/6A0DAD/ffffff?text=Go+Seven"
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        )}
+        <Link
+          href={`/product/${product._id}/preview`}
+          aria-label={`View details for ${product.name}`}
+          className="absolute inset-0 block"
+        >
+          {product.images.length > 0 ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${product.images[activeImage]?.url || 'fallback'}-${activeImage}`}
+                initial={{ opacity: 0, scale: 1 }}
+                animate={{ opacity: 1, scale: 1.05 }}
+                exit={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={product.images[activeImage]?.url || 'https://placehold.co/600x700/6A0DAD/ffffff?text=Go+Seven'}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  className="object-cover"
+                  priority={activeImage === 0}
+                />
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <Image
+              src="https://placehold.co/600x700/6A0DAD/ffffff?text=Go+Seven"
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          )}
+        </Link>
 
-        {/* Overlay - visible on hover (desktop) and tap (mobile) */}
-        <div className="absolute inset-0 bg-black/30 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 z-30">
+        <div className="pointer-events-none absolute inset-0 hidden items-center justify-center gap-4 bg-black/30 opacity-0 transition-opacity duration-300 lg:flex lg:group-hover:opacity-100 z-30">
           <button
             onClick={handleAddToCart}
-            className={`p-3 rounded-full shadow-lg transform transition-all active:scale-90 ${
+            aria-label={`Add ${product.name} to cart`}
+            className={`pointer-events-auto p-3 rounded-full shadow-lg transform transition-all active:scale-90 ${
               added ? 'bg-green-500 text-white' : 'bg-white text-primary hover:bg-primary hover:text-white'
             }`}
           >
@@ -140,10 +146,30 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </button>
           <Link
             href={`/product/${product._id}/preview`}
-            className="bg-white text-primary p-3 rounded-full shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90"
+            aria-label={`Preview ${product.name}`}
+            className="pointer-events-auto bg-white text-primary p-3 rounded-full shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90"
           >
             <Eye size={20} />
           </Link>
+        </div>
+
+        <div className="absolute bottom-3 right-3 flex items-center gap-2 lg:hidden z-30">
+          <Link
+            href={`/product/${product._id}/preview`}
+            aria-label={`Preview ${product.name}`}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-primary shadow-lg backdrop-blur-sm transition-transform active:scale-90"
+          >
+            <Eye size={20} />
+          </Link>
+          <button
+            onClick={handleAddToCart}
+            aria-label={`Add ${product.name} to cart`}
+            className={`flex h-11 w-11 items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-transform active:scale-90 ${
+              added ? 'bg-green-500 text-white' : 'bg-white/95 text-primary'
+            }`}
+          >
+            <ShoppingCart size={20} />
+          </button>
         </div>
 
         {/* Badge stickers */}
@@ -166,7 +192,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       {/* Info */}
       <div className="p-6">
-        <h3 className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+        <Link href={`/product/${product._id}/preview`} className="inline-block">
+          <h3 className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+        </Link>
         {/* Sizes */}
         {product.sizes.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2 mb-2">
