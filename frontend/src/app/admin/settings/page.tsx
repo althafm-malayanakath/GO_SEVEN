@@ -56,7 +56,7 @@ export default function AdminSettingsPage() {
           {CURRENCIES.map((c) => (
             <button
               key={c.code}
-              onClick={() => setSelected({ currency: c.code, currencySymbol: c.symbol })}
+              onClick={() => setSelected((current) => ({ ...current, currency: c.code, currencySymbol: c.symbol }))}
               className={`flex items-center justify-between px-4 py-3 rounded-2xl border-2 text-left transition-colors ${
                 selected.currency === c.code
                   ? 'border-primary bg-primary/10 text-white'
@@ -70,6 +70,43 @@ export default function AdminSettingsPage() {
               {selected.currency === c.code && <Check size={16} className="text-primary" />}
             </button>
           ))}
+        </div>
+
+        <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+          <h2 className="text-lg font-bold mb-1">WhatsApp Contact</h2>
+          <p className="text-sm text-white/50 mb-5">This number and message power customer contact buttons and footer links.</p>
+
+          <div className="space-y-4">
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-white/80">Admin WhatsApp Number</span>
+              <input
+                value={selected.whatsappNumber}
+                onChange={(event) => setSelected({ ...selected, whatsappNumber: event.target.value })}
+                placeholder="+97431685812"
+                className="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-primary"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-white/80">Default WhatsApp Message</span>
+              <textarea
+                value={selected.whatsappMessage}
+                onChange={(event) => setSelected({ ...selected, whatsappMessage: event.target.value })}
+                rows={3}
+                className="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-primary"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-white/80">Footer Support Text</span>
+              <textarea
+                value={selected.footerSupportText}
+                onChange={(event) => setSelected({ ...selected, footerSupportText: event.target.value })}
+                rows={3}
+                className="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-primary"
+              />
+            </label>
+          </div>
         </div>
 
         {error && <p className="text-red-400 text-sm mb-4">{error}</p>}

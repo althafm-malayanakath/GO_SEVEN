@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import WhatsAppContactButton from "@/components/WhatsAppContactButton";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SettingsProvider } from "@/context/SettingsContext";
@@ -37,6 +38,9 @@ export default function RootLayout({
             <CartProvider>
               <Suspense fallback={null}>
                 <Navbar />
+              </Suspense>
+              <Suspense fallback={null}>
+                <WhatsAppContactButton />
               </Suspense>
               <main className="min-h-screen text-white">{children}</main>
             </CartProvider>

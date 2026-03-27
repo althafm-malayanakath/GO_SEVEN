@@ -300,4 +300,7 @@ export interface ReviewsResponse {
 export interface AppSettings {
   currency: string;
   currencySymbol: string;
+  whatsappNumber: string;
+  whatsappMessage: string;
+  footerSupportText: string;
 }

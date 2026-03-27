@@ -9,7 +9,13 @@ interface SettingsContextValue {
   refreshSettings: () => Promise<void>;
 }
 
-const DEFAULT_SETTINGS: AppSettings = { currency: 'USD', currencySymbol: '$' };
+const DEFAULT_SETTINGS: AppSettings = {
+  currency: 'USD',
+  currencySymbol: '$',
+  whatsappNumber: '+97431685812',
+  whatsappMessage: 'Hi, I want to enquire about your products.',
+  footerSupportText: 'Need help with size, stock, or custom orders? Message us on WhatsApp.',
+};
 
 const SettingsContext = createContext<SettingsContextValue>({
   settings: DEFAULT_SETTINGS,
@@ -23,7 +29,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const load = async () => {
     try {
       const data = await api.getSettings();
-      setSettings(data);
+      setSettings({ ...DEFAULT_SETTINGS, ...data });
     } catch {
       // keep defaults
     }

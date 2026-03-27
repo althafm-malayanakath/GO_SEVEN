@@ -7,6 +7,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, CreditCard, CheckCircle2, MapPin, MessageCircle, Package, ShieldCheck } from 'lucide-react';
 import { api, Order, OrderStatus } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
+import { buildWhatsAppUrl } from '@/lib/whatsapp';
 
 const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -24,6 +26,7 @@ export default function OrderPage() {
   const isSuccess = searchParams.get('success') === 'true';
   const { id } = useParams<{ id: string }>();
   const { user, isReady, isAdmin } = useAuth();
+  const { settings } = useSettings();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,9 +118,6 @@ export default function OrderPage() {
   const handleWhatsAppChat = () => {
     if (!order) return;
 
-    const adminNumber = process.env.NEXT_PUBLIC_WHATSAPP_ADMIN_NUMBER || '+97431685812';
-    const cleanNumber = adminNumber.replace(/\D/g, '');
-
     let productSummary = '';
     order.orderItems.forEach((item, index) => {
       productSummary += `\n🛍️ *Item ${index + 1}:* ${item.name}`;
@@ -139,9 +139,10 @@ export default function OrderPage() {
 📍 *Shipping Address:*
 ${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippingAddress.postalCode}, ${order.shippingAddress.country}
 
-Looking forward to the update!`;
+    Looking forward to the update!`;
 
-    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = buildWhatsAppUrl(settings.whatsappNumber, message);
+    if (!whatsappUrl) return;
     window.open(whatsappUrl, '_blank');
   };
 

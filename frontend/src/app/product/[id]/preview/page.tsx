@@ -7,7 +7,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Star } from 'lucide-react';
 import { api, Product } from '@/lib/api';
-import { MOCK_PRODUCTS } from '@/lib/mockProducts';
 import { useCart } from '@/context/CartContext';
 import { isDiscountActive, getEffectivePrice } from '@/lib/discount';
 import { useSettings } from '@/context/SettingsContext';
@@ -22,6 +21,7 @@ export default function ProductPreviewPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
   const [added, setAdded] = useState(false);
@@ -39,11 +39,12 @@ export default function ProductPreviewPage() {
         if (!isMounted) return;
         setProduct(fetched);
         setSelectedSize(fetched.sizes?.[0] ?? '');
-      } catch {
-        const mock = MOCK_PRODUCTS.find((item) => item._id === id) ?? null;
+        setLoadError('');
+      } catch (error) {
         if (!isMounted) return;
-        setProduct(mock);
-        setSelectedSize(mock?.sizes?.[0] ?? '');
+        setProduct(null);
+        setSelectedSize('');
+        setLoadError(error instanceof Error ? error.message : 'This product preview is unavailable right now.');
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -112,7 +113,7 @@ export default function ProductPreviewPage() {
       <div className="min-h-screen flex items-center justify-center px-4 pt-24">
         <div className="glass rounded-2xl p-8 text-center max-w-md">
           <h1 className="text-2xl font-black mb-2">Product not found</h1>
-          <p className="text-white/80 mb-6">This product preview is unavailable right now.</p>
+          <p className="text-white/80 mb-6">{loadError || 'This product preview is unavailable right now.'}</p>
           <Link
             href="/collections"
             className="inline-flex items-center justify-center rounded-full bg-white text-primary px-6 py-3 font-semibold"

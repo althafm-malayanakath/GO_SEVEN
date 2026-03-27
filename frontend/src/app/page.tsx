@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap, Shield, Truck } from 'lucide-react';
+import { ArrowRight, MessageCircle, Zap, Shield, Truck } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Hero3D from '@/components/Hero3D';
+import { useSettings } from '@/context/SettingsContext';
 import { api, Product } from '@/lib/api';
-import { MOCK_PRODUCTS } from '@/lib/mockProducts';
+import { buildWhatsAppUrl } from '@/lib/whatsapp';
 
 const FEATURES = [
   { icon: Zap, title: 'Premium Quality', desc: 'Every piece crafted with the finest materials' },
@@ -17,19 +18,24 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
+  const { settings } = useSettings();
   const [featured, setFeatured] = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const whatsappUrl = buildWhatsAppUrl(settings.whatsappNumber, settings.whatsappMessage);
 
   useEffect(() => {
     api.getProducts()
       .then((products) => {
         setFeatured(products.filter((p) => p.isFeatured).slice(0, 4));
         setNewArrivals(products.filter((p) => p.isNewArrival).slice(0, 4));
+        setLoadError('');
       })
-      .catch(() => {
-        setFeatured(MOCK_PRODUCTS.filter((p) => p.isFeatured).slice(0, 4));
-        setNewArrivals(MOCK_PRODUCTS.filter((p) => p.isNewArrival).slice(0, 4));
+      .catch((error) => {
+        setFeatured([]);
+        setNewArrivals([]);
+        setLoadError(error instanceof Error ? error.message : 'Unable to load products right now.');
       })
       .finally(() => setLoading(false));
   }, []);
@@ -123,6 +129,11 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featured.map((p) => <ProductCard key={p._id} product={p} />)}
             </div>
+          ) : loadError ? (
+            <div className="rounded-3xl border border-white/12 bg-white/6 px-6 py-10 text-center text-white/72">
+              <p className="text-lg font-semibold text-white">Unable to load featured products</p>
+              <p className="mt-2 text-sm">{loadError}</p>
+            </div>
           ) : (
             <div className="text-center py-20 text-white/60">
               <p className="text-lg">Products coming soon. Check back later.</p>
@@ -176,14 +187,42 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-transparent border-t border-white/15 text-white/70 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <Image src="/logo.svg" alt="Go Seven" width={120} height={44} className="h-9 w-auto brightness-0 invert" />
-            <div className="flex gap-8 text-sm">
+          <div className="grid gap-10 lg:grid-cols-[auto_1fr_auto] lg:items-center">
+            <div className="space-y-4">
+              <Image src="/logo.svg" alt="Go Seven" width={120} height={44} className="h-9 w-auto brightness-0 invert" />
+              <p className="max-w-sm text-sm text-white/60">
+                {settings.footerSupportText}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-8 text-sm">
               <Link href="/collections" className="hover:text-white transition-colors">Collections</Link>
               <Link href="/about" className="hover:text-white transition-colors">About</Link>
               <Link href="/account" className="hover:text-white transition-colors">Account</Link>
             </div>
-            <p className="text-sm">&#169; 2026 Go Seven. All rights reserved.</p>
+
+            <div className="rounded-3xl border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/50">WhatsApp Support</p>
+              <p className="mt-3 text-lg font-bold text-white">{settings.whatsappNumber}</p>
+              <p className="mt-2 max-w-xs text-sm text-white/60">
+                Direct enquiries, stock checks, and support are available on WhatsApp.
+              </p>
+              {whatsappUrl && (
+                <Link
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#20ba59]"
+                >
+                  <MessageCircle size={18} />
+                  Chat on WhatsApp
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-white/10 pt-6 text-sm text-white/50">
+            <p>&#169; 2026 Go Seven. All rights reserved.</p>
           </div>
         </div>
       </footer>

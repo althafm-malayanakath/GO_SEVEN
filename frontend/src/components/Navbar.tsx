@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ShoppingCart, User, Menu, X, Search, ShieldCheck, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
@@ -11,10 +11,15 @@ import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchKey = searchParams.toString();
+  const currentSearch = searchParams.get('search') || '';
+  const currentFilter = searchParams.get('filter') || '';
+  const [searchQuery, setSearchQuery] = useState(currentSearch);
   const { totalItems } = useCart();
   const { user, logout, isAdmin, isReady } = useAuth();
 
@@ -26,6 +31,8 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsOpen(false);
+    setIsSearchOpen(false);
+    setSearchQuery(currentSearch);
   }, [pathname, searchKey]);
 
   useEffect(() => {
@@ -38,6 +45,28 @@ const Navbar = () => {
       document.body.style.overflow = originalOverflow;
     };
   }, [isOpen]);
+
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const params = new URLSearchParams();
+    const normalizedQuery = searchQuery.trim();
+
+    if (pathname === '/collections' && currentFilter) {
+      params.set('filter', currentFilter);
+    }
+
+    if (normalizedQuery) {
+      params.set('search', normalizedQuery);
+    }
+
+    router.push(`/collections${params.toString() ? `?${params.toString()}` : ''}`);
+  };
+
+  const toggleSearch = () => {
+    setIsOpen(false);
+    setIsSearchOpen((open) => !open);
+  };
 
   return (
     <>
@@ -65,7 +94,13 @@ const Navbar = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-6">
-              <button className="hover:text-[#f1deff] transition-colors">
+              <button
+                type="button"
+                onClick={toggleSearch}
+                aria-expanded={isSearchOpen}
+                aria-label={isSearchOpen ? 'Close search' : 'Open search'}
+                className="hover:text-[#f1deff] transition-colors"
+              >
                 <Search size={22} />
               </button>
               {isReady && user ? (
@@ -98,7 +133,13 @@ const Navbar = () => {
             </div>
 
             <div className="md:hidden flex items-center space-x-4">
-              <button className="hover:text-[#f1deff] transition-colors p-2">
+              <button
+                type="button"
+                onClick={toggleSearch}
+                aria-expanded={isSearchOpen}
+                aria-label={isSearchOpen ? 'Close search' : 'Open search'}
+                className="hover:text-[#f1deff] transition-colors p-2"
+              >
                 <Search size={22} />
               </button>
               <Link href="/cart" className="relative hover:text-[#f1deff] transition-colors p-2">
@@ -110,7 +151,10 @@ const Navbar = () => {
                 )}
               </Link>
               <button
-                onClick={() => setIsOpen((open) => !open)}
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  setIsOpen((open) => !open);
+                }}
                 aria-expanded={isOpen}
                 aria-label={isOpen ? 'Close menu' : 'Open menu'}
                 className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white/20 focus:outline-none"
@@ -120,6 +164,47 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+
+        {isSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border-t border-white/15 bg-[rgba(90,14,122,0.88)] backdrop-blur-md"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <form onSubmit={handleSearchSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                  <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/55" />
+                  <input
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search by name, category, or description"
+                    autoFocus
+                    className="w-full rounded-full border border-white/20 bg-white/12 py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/55 outline-none transition-colors focus:border-white/45"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="submit"
+                    className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-primary transition-colors hover:bg-[#f1deff]"
+                  >
+                    Search
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery(currentSearch);
+                      setIsSearchOpen(false);
+                    }}
+                    className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition-colors hover:border-white/45"
+                  >
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        )}
 
         {isOpen && (
           <motion.div
