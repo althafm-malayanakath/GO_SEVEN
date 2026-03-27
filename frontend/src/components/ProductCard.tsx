@@ -25,6 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0]?.name || '');
   const cardRef = useRef<HTMLDivElement>(null);
   const slideshowRef = useRef<number | null>(null);
+  const description = product.description?.trim();
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -84,7 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 800 }}
-      className="group relative flex h-full min-h-[31rem] flex-col overflow-hidden rounded-2xl border border-purple-200/80 bg-white text-black shadow-sm transition-shadow duration-300 hover:shadow-2xl sm:min-h-[33rem]"
+      className="group relative flex h-full min-h-[28.5rem] flex-col overflow-hidden rounded-2xl border border-purple-200/80 bg-white text-black shadow-sm transition-shadow duration-300 hover:shadow-2xl sm:min-h-[30.5rem]"
     >
       <motion.div
         className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -94,7 +95,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <motion.div
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         whileTap={{ scale: 0.98 }}
-        className="relative h-64 overflow-hidden sm:h-72"
+        className="relative h-56 overflow-hidden sm:h-64"
       >
         <Link
           href={`/product/${product._id}/preview`}
@@ -187,14 +188,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </motion.div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <Link href={`/product/${product._id}/preview`} className="inline-block">
-          <h3 className="min-h-[3.5rem] text-lg font-bold leading-tight transition-colors line-clamp-2 group-hover:text-primary">
+          <h3 className="min-h-[3.25rem] text-lg font-bold leading-tight transition-colors line-clamp-2 group-hover:text-primary">
             {product.name}
           </h3>
         </Link>
 
-        <div className="mt-3 min-h-[6rem]">
+        <p className="mt-1.5 min-h-[2.5rem] text-sm leading-5 text-black/60 line-clamp-2">
+          {description || ''}
+        </p>
+
+        <div className="mt-3 min-h-[4.75rem]">
           {product.sizes.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {product.sizes.map((size) => (
@@ -204,7 +209,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     e.preventDefault();
                     setSelectedSize(size);
                   }}
-                  className={`rounded-md border px-3 py-1 text-xs font-semibold transition-colors ${
+                  className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold leading-none transition-colors ${
                     selectedSize === size
                       ? 'border-primary bg-primary text-white'
                       : 'border-purple-200 text-black/60 hover:border-primary'
@@ -217,7 +222,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        <div className="mt-3 min-h-[1.75rem]">
+        <div className="mt-3 min-h-[1.5rem]">
           {product.colors?.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {product.colors.map((color) => (
@@ -238,8 +243,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        <div className="mt-auto flex min-h-[4.75rem] items-end justify-between gap-3 pt-4">
-          <div className="min-h-[4.75rem]">
+        <div className="mt-auto flex min-h-[4rem] items-end justify-between gap-3 pt-3">
+          <div className="min-h-[4rem]">
             {discountActive ? (
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-extrabold text-red-500">{formatPrice(getEffectivePrice(product))}</span>
