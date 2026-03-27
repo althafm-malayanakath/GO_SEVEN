@@ -13,9 +13,10 @@ import CountdownTimer from '@/components/CountdownTimer';
 
 interface ProductCardProps {
   product: Product;
+  compact?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) => {
   const { addItem } = useCart();
   const { formatPrice } = useSettings();
   const [added, setAdded] = useState(false);
@@ -85,7 +86,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 800 }}
-      className="group relative flex h-full min-h-[28.5rem] flex-col overflow-hidden rounded-2xl border border-purple-200/80 bg-white text-black shadow-sm transition-shadow duration-300 hover:shadow-2xl sm:min-h-[30.5rem]"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-purple-200/80 bg-white text-black shadow-sm transition-shadow duration-300 hover:shadow-2xl"
     >
       <motion.div
         className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -95,7 +96,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <motion.div
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         whileTap={{ scale: 0.98 }}
-        className="relative h-56 overflow-hidden sm:h-64"
+        className={`relative overflow-hidden ${compact ? 'h-48 sm:h-56' : 'h-56 sm:h-64'}`}
       >
         <Link
           href={`/product/${product._id}/preview`}
@@ -188,19 +189,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </motion.div>
 
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
+      <div className={`flex flex-col ${compact ? 'p-4' : 'p-4 sm:p-5'}`}>
         <Link href={`/product/${product._id}/preview`} className="inline-block">
-          <h3 className="min-h-[3.25rem] text-lg font-bold leading-tight transition-colors line-clamp-2 group-hover:text-primary">
+          <h3 className="text-lg font-bold leading-tight transition-colors line-clamp-2 group-hover:text-primary">
             {product.name}
           </h3>
         </Link>
 
-        <p className="mt-1.5 min-h-[2.5rem] text-sm leading-5 text-black/60 line-clamp-2">
-          {description || ''}
-        </p>
+        {description && (
+          <p className="mt-1.5 text-sm leading-5 text-black/60 line-clamp-2">
+            {description}
+          </p>
+        )}
 
-        <div className="mt-3 min-h-[4.75rem]">
-          {product.sizes.length > 0 && (
+        {product.sizes.length > 0 && (
+          <div className="mt-3">
             <div className="flex flex-wrap gap-1.5">
               {product.sizes.map((size) => (
                 <button
@@ -219,11 +222,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </button>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="mt-3 min-h-[1.5rem]">
-          {product.colors?.length > 0 && (
+        {product.colors?.length > 0 && (
+          <div className="mt-3">
             <div className="flex flex-wrap gap-2">
               {product.colors.map((color) => (
                 <button
@@ -240,11 +243,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 />
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="mt-auto flex min-h-[4rem] items-end justify-between gap-3 pt-3">
-          <div className="min-h-[4rem]">
+        <div className="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
             {discountActive ? (
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-extrabold text-red-500">{formatPrice(getEffectivePrice(product))}</span>
@@ -266,9 +269,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-1 self-end pb-1">
+          <div className="flex shrink-0 items-center gap-1 text-sm">
             <span aria-hidden="true" className="text-yellow-400">&#9733;</span>
-            <span className="text-sm font-medium">{product.rating}</span>
+            <span className="font-medium">{product.rating}</span>
             <span className="text-xs text-black/40">({product.numReviews})</span>
           </div>
         </div>

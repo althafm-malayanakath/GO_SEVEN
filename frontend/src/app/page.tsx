@@ -115,16 +115,16 @@ export default function HomePage() {
           </div>
 
           {loading ? (
-            <div className="grid auto-rows-[1fr] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-72 rounded-2xl bg-white/14 animate-pulse" />
+                <div key={i} className="h-64 rounded-2xl bg-white/14 animate-pulse" />
               ))}
             </div>
           ) : featured.length > 0 ? (
-            <div className="grid auto-rows-[1fr] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {featured.map((p) => (
-                <div key={p._id} className="h-full">
-                  <ProductCard product={p} />
+                <div key={p._id}>
+                  <ProductCard product={p} compact />
                 </div>
               ))}
             </div>
@@ -154,10 +154,10 @@ export default function HomePage() {
                 View All <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="grid auto-rows-[1fr] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {newArrivals.map((p) => (
-                <div key={p._id} className="h-full">
-                  <ProductCard product={p} />
+                <div key={p._id}>
+                  <ProductCard product={p} compact />
                 </div>
               ))}
             </div>
