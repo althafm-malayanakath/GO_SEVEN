@@ -93,23 +93,28 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         style={{ background: glowBg }}
       />
 
-      {/* Image */}
-      <div className="relative h-64 overflow-hidden">
+      <motion.div
+        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+        whileTap={{ scale: 0.98 }}
+        className="relative h-64 sm:h-72 overflow-hidden"
+      >
         {product.images.length > 0 ? (
           <AnimatePresence mode="wait">
             <motion.div
               key={`${product.images[activeImage]?.url || 'fallback'}-${activeImage}`}
-              initial={{ opacity: 0, x: 28, scale: 1.01 }}
-              animate={{ opacity: 1, x: 0, scale: 1.05 }}
-              exit={{ opacity: 0, x: -28, scale: 1 }}
-              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, scale: 1 }}
+              animate={{ opacity: 1, scale: 1.05 }}
+              exit={{ opacity: 0, scale: 1 }}
+              transition={{ duration: 0.4 }}
               className="absolute inset-0"
             >
               <Image
                 src={product.images[activeImage]?.url || 'https://placehold.co/600x700/6A0DAD/ffffff?text=Go+Seven'}
                 alt={product.name}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 className="object-cover"
+                priority={activeImage === 0}
               />
             </motion.div>
           </AnimatePresence>
@@ -118,27 +123,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src="https://placehold.co/600x700/6A0DAD/ffffff?text=Go+Seven"
             alt={product.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         )}
 
-        {product.images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-            {product.images.map((image, index) => (
-              <span
-                key={`dot-${image.url}-${index}`}
-                className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                  index === activeImage ? 'bg-white' : 'bg-white/35'
-                }`}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
+        {/* Overlay - visible on hover (desktop) and tap (mobile) */}
+        <div className="absolute inset-0 bg-black/30 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 z-30">
           <button
             onClick={handleAddToCart}
-            className={`p-3 rounded-full transition-colors ${
+            className={`p-3 rounded-full shadow-lg transform transition-all active:scale-90 ${
               added ? 'bg-green-500 text-white' : 'bg-white text-primary hover:bg-primary hover:text-white'
             }`}
           >
@@ -146,29 +140,29 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </button>
           <Link
             href={`/product/${product._id}/preview`}
-            aria-label={`Preview ${product.name}`}
-            title={`Preview ${product.name}`}
-            className="bg-white text-primary p-3 rounded-full hover:bg-primary hover:text-white transition-colors"
+            className="bg-white text-primary p-3 rounded-full shadow-lg hover:bg-primary hover:text-white transition-all active:scale-90"
           >
             <Eye size={20} />
           </Link>
         </div>
-        <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
-          <span className="glass px-3 py-1 rounded-full text-xs font-semibold text-primary uppercase tracking-wider bg-white/80">
+
+        {/* Badge stickers */}
+        <div className="absolute top-3 left-3 flex gap-2 flex-wrap z-20">
+          <span className="backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-primary uppercase tracking-wider bg-white/90 shadow-sm">
             {product.category}
           </span>
           {product.isNewArrival && (
-            <span className="px-3 py-1 rounded-full text-xs font-semibold text-white bg-primary">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white bg-primary shadow-sm">
               NEW
             </span>
           )}
           {discountActive && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-red-500">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white bg-red-500 shadow-sm">
               {product.discount}% OFF
             </span>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Info */}
       <div className="p-6">

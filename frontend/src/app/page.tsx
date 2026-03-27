@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -114,13 +114,13 @@ export default function HomePage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="h-72 rounded-2xl bg-white/14 animate-pulse" />
               ))}
             </div>
           ) : featured.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featured.map((p) => <ProductCard key={p._id} product={p} />)}
             </div>
           ) : (
@@ -144,7 +144,7 @@ export default function HomePage() {
                 View All <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {newArrivals.map((p) => <ProductCard key={p._id} product={p} />)}
             </div>
           </div>
