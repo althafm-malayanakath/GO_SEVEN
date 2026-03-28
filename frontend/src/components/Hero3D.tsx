@@ -8,6 +8,9 @@ import * as THREE from 'three';
 type CanvasErrorBoundaryProps = { children: ReactNode };
 type CanvasErrorBoundaryState = { hasError: boolean };
 
+const SHIRT_POSITION: [number, number, number] = [0, -0.72, 0];
+const SHADOW_POSITION: [number, number, number] = [0, -1.65, 0];
+
 function pseudoRandom(seed: number) {
   const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
   return value - Math.floor(value);
@@ -26,7 +29,7 @@ class CanvasErrorBoundary extends Component<CanvasErrorBoundaryProps, CanvasErro
   override render() {
     if (this.state.hasError) {
       return (
-        <mesh position={[1.12, -0.72, 0]}>
+        <mesh position={SHIRT_POSITION}>
           <boxGeometry args={[0.85, 1.1, 0.35]} />
           <meshStandardMaterial color="#f3f4f6" />
         </mesh>
@@ -196,7 +199,7 @@ function TShirt() {
   }, []);
 
   return (
-    <group ref={groupRef} position={[1.12, -0.72, 0]} scale={1.45} dispose={null}>
+    <group ref={groupRef} position={SHIRT_POSITION} scale={1.45} dispose={null}>
       <group>
         <primitive object={shirtObject} />
 
@@ -260,7 +263,7 @@ export default function Hero3D() {
         <CanvasErrorBoundary>
           <Suspense
             fallback={
-              <mesh position={[1.12, -0.72, 0]}>
+              <mesh position={SHIRT_POSITION}>
                 <boxGeometry args={[0.85, 1.1, 0.35]} />
                 <meshStandardMaterial color="#f3f4f6" />
               </mesh>
@@ -272,13 +275,7 @@ export default function Hero3D() {
           </Suspense>
         </CanvasErrorBoundary>
 
-        <ContactShadows
-          position={[1.12, -1.65, 0]}
-          opacity={0.34}
-          scale={6}
-          blur={2.2}
-          far={4}
-        />
+        <ContactShadows position={SHADOW_POSITION} opacity={0.34} scale={6} blur={2.2} far={4} />
       </Canvas>
     </div>
   );
