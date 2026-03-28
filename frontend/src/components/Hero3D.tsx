@@ -95,78 +95,88 @@ function TShirt() {
     return texture;
   }, [smileTextureSource]);
 
-  const taglineTextureSource = useTexture('/tagline-embroidery.png');
-  const taglineTexture = useMemo(() => {
-    const img = taglineTextureSource.image as HTMLImageElement;
-    const W = img.naturalWidth || img.width;
-    const H = img.naturalHeight || img.height;
+  // Left-chest logo: "go" (purple oval blob) + "SEVE" (gray) + "N" (purple)
+  // Matches the brand identity — generated entirely in canvas, no PNG needed.
+  const chestLogoTexture = useMemo(() => {
+    const W = 360, H = 140;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d')!;
-    ctx.drawImage(img, 0, 0);
-    const id = ctx.getImageData(0, 0, W, H);
-    const d = id.data;
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const i = (y * W + x) * 4;
-        // Strip the top decorative bar
-        if (y < H * 0.08) { d[i + 3] = 0; continue; }
-        const lum = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
-        // White/near-white background → fully transparent
-        if (lum > 228) {
-          d[i + 3] = 0;
-        } else if (lum > 190) {
-          // Smooth anti-aliased edges
-          d[i + 3] = Math.round(((228 - lum) / 38) * 255);
-        }
-      }
-    }
-    ctx.putImageData(id, 0, 0);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.anisotropy = 16;
-    texture.needsUpdate = true;
-    return texture;
-  }, [taglineTextureSource]);
+    ctx.clearRect(0, 0, W, H);
 
-  const taglineBumpTextureSource = useTexture('/tagline-embroidery-bump.png');
-  const taglineBumpTexture = useMemo(() => {
-    const img = taglineBumpTextureSource.image as HTMLImageElement;
-    const W = img.naturalWidth || img.width;
-    const H = img.naturalHeight || img.height;
+    const PURPLE = '#9416F5'; // bold brand purple, visible on white fabric
+    const GRAY   = '#4A4A4A'; // dark enough to read on white shirt
+
+    // "g" lowercase bold
+    ctx.fillStyle = PURPLE;
+    ctx.font = 'bold 90px Arial, Helvetica, sans-serif';
+    ctx.fillText('g', 5, 110);
+    const gW = ctx.measureText('g').width;
+
+    // Oval blob "o" — drawn as ellipse (matches logo's oversized "o" mark)
+    const ovalCX = 5 + gW + 8 + 30;
+    ctx.beginPath();
+    ctx.ellipse(ovalCX, 72, 30, 36, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // "SEVE" in dark gray
+    ctx.font = 'bold 52px Arial, Helvetica, sans-serif';
+    const seveX = ovalCX + 30 + 14;
+    ctx.fillStyle = GRAY;
+    ctx.fillText('SEVE', seveX, 100);
+    const seveW = ctx.measureText('SEVE').width;
+
+    // "N" in purple — mirrors "go" color, creates branded purple bookend
+    ctx.fillStyle = PURPLE;
+    ctx.fillText('N', seveX + seveW, 100);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.minFilter = THREE.LinearMipMapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 16;
+    tex.needsUpdate = true;
+    return tex;
+  }, []);
+
+  // Bump map: black bg = flat fabric, white = raised embroidery threads
+  const chestLogoBump = useMemo(() => {
+    const W = 360, H = 140;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d')!;
-    ctx.drawImage(img, 0, 0);
-    const id = ctx.getImageData(0, 0, W, H);
-    const d = id.data;
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const i = (y * W + x) * 4;
-        // Strip top bar
-        if (y < H * 0.08) { d[i] = d[i + 1] = d[i + 2] = 0; continue; }
-        // Invert: white bg (lum≈255) → 0 (flat), dark text (lum≈80) → 175 (raised)
-        const lum = Math.round(d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114);
-        const inv = 255 - lum;
-        d[i] = d[i + 1] = d[i + 2] = inv;
-      }
-    }
-    ctx.putImageData(id, 0, 0);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.anisotropy = 16;
-    texture.needsUpdate = true;
-    return texture;
-  }, [taglineBumpTextureSource]);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 90px Arial, Helvetica, sans-serif';
+    ctx.fillText('g', 5, 110);
+    const gW = ctx.measureText('g').width;
+
+    const ovalCX = 5 + gW + 8 + 30;
+    ctx.beginPath();
+    ctx.ellipse(ovalCX, 72, 30, 36, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = 'bold 52px Arial, Helvetica, sans-serif';
+    const seveX = ovalCX + 30 + 14;
+    ctx.fillText('SEVE', seveX, 100);
+    const seveW = ctx.measureText('SEVE').width;
+    ctx.fillText('N', seveX + seveW, 100);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.minFilter = THREE.LinearMipMapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 16;
+    tex.needsUpdate = true;
+    return tex;
+  }, []);
 
   const printRoughnessTexture = useMemo(() => {
     const size = 256;
@@ -207,10 +217,10 @@ function TShirt() {
   useEffect(() => {
     return () => {
       smileTexture.dispose();
-      taglineTexture.dispose();
-      taglineBumpTexture.dispose();
+      chestLogoTexture.dispose();
+      chestLogoBump.dispose();
     };
-  }, [smileTexture, taglineTexture, taglineBumpTexture]);
+  }, [smileTexture, chestLogoTexture, chestLogoBump]);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
@@ -255,17 +265,18 @@ function TShirt() {
     return clone;
   }, [scene]);
 
-  // Slightly curved chest plane so the artwork reads as embroidered onto the fabric.
+  // Small curved plane for the left-chest logo (360×140 canvas → ratio 2.57)
   const chestPrintGeometry = useMemo(() => {
-    const geometry = new THREE.PlaneGeometry(0.88, 0.074, 160, 32);
+    const W = 0.27, H = W * (140 / 360); // preserves canvas aspect ratio
+    const geometry = new THREE.PlaneGeometry(W, H, 60, 24);
     const pos = geometry.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const y = pos.getY(i);
-      const curveAcross = -Math.pow(Math.abs(x) / 0.44, 2) * 0.024;
-      const curveDown = -Math.pow(y / 0.037, 2) * 0.0024;
-      const chestSlope = -y * 0.012;
+      const curveAcross = -Math.pow(Math.abs(x) / (W / 2), 2) * 0.007;
+      const curveDown   = -Math.pow(y / (H / 2), 2) * 0.001;
+      const chestSlope  = -y * 0.008;
       pos.setZ(i, curveAcross + curveDown + chestSlope);
     }
 
@@ -296,23 +307,23 @@ function TShirt() {
       <group>
         <primitive object={shirtObject} />
 
-        {/* Center chest embroidery using the brand tagline from the logo. */}
+        {/* Left-chest logo embroidery: "go SEVEN" brand mark */}
         <mesh
           geometry={chestPrintGeometry}
-          position={[0, 0.31, 0.394]}
-          rotation={[-0.035, 0, 0]}
+          position={[-0.18, 0.35, 0.385]}
+          rotation={[-0.03, 0.06, 0]}
           renderOrder={9}
           frustumCulled={false}
         >
           <meshStandardMaterial
-            map={taglineTexture}
+            map={chestLogoTexture}
             transparent
             alphaTest={0.04}
-            opacity={0.94}
-            bumpMap={taglineBumpTexture}
-            bumpScale={0.075}
+            opacity={0.95}
+            bumpMap={chestLogoBump}
+            bumpScale={0.082}
             roughnessMap={printRoughnessTexture ?? undefined}
-            roughness={0.88}
+            roughness={0.90}
             metalness={0}
             emissive="#5a0090"
             emissiveIntensity={0.03}
