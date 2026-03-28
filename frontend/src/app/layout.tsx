@@ -21,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Go Seven - Premium Streetwear",
-  description: "Elevate your style with Go Seven's exclusive collection of premium streetwear and fashion.",
+  title: "Go Seven - Premium Outfits & Embroideries",
+  description: "Discover premium outfits and premium embroideries crafted with refined detailing, elevated texture, and luxury finish.",
   icons: {
     icon: [
       { url: "/go7-browser-icon.png", type: "image/png", sizes: "1024x1024" },
