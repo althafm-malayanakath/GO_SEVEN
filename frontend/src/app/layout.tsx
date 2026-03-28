@@ -24,9 +24,12 @@ export const metadata: Metadata = {
   title: "Go Seven - Premium Streetwear",
   description: "Elevate your style with Go Seven's exclusive collection of premium streetwear and fashion.",
   icons: {
-    icon: "/tab-icon.svg",
-    shortcut: "/tab-icon.svg",
-    apple: "/tab-icon.svg",
+    icon: [
+      { url: "/go7-browser-icon.png", type: "image/png", sizes: "1024x1024" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
