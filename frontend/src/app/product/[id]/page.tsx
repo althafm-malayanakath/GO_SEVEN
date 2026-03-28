@@ -245,7 +245,7 @@ export default function ProductPage() {
             <div className="flex flex-col gap-3 text-sm text-white/80">
               <div className="flex items-center gap-2">
                 <Truck size={16} className="text-primary" />
-                Free shipping on orders over $150
+                Free shipping on all orders
               </div>
               <div className="flex items-center gap-2">
                 <Shield size={16} className="text-primary" />

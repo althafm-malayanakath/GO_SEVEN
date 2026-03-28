@@ -11,7 +11,7 @@ import { api, Product } from '@/lib/api';
 const FEATURES = [
   { icon: Zap, title: 'Premium Quality', desc: 'Every piece crafted with the finest materials' },
   { icon: Shield, title: 'Authenticity', desc: 'Guaranteed genuine streetwear, no replicas' },
-  { icon: Truck, title: 'Fast Delivery', desc: 'Free shipping on orders over $150' },
+  { icon: Truck, title: 'Fast Delivery', desc: 'Free shipping on all orders' },
 ];
 
 export default function HomePage() {
@@ -47,16 +47,13 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
-            <span className="inline-block px-4 py-1 rounded-full text-sm font-semibold bg-white/14 text-white border border-white/25 mb-6">
-              New Collection 2026
-            </span>
             <h1 className="text-5xl sm:text-7xl font-black tracking-tight leading-none mb-6">
-              <span className="text-gradient">BEYOND</span>
+              <span className="text-gradient">STITCHED TO</span>
               <br />
-              <span className="drop-shadow-[0_0_14px_rgba(255,255,255,0.2)]">THE STREETS</span>
+              <span className="drop-shadow-[0_0_14px_rgba(255,255,255,0.2)]">STAND OUT</span>
             </h1>
             <p className="text-lg text-white/88 mb-10 max-w-md">
-              Premium streetwear engineered for those who move different. Limited drops, unlimited style.
+              Premium embroidered pieces crafted with refined texture, precise detailing, and a luxury finish built to stand apart.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
