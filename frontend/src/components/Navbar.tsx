@@ -81,9 +81,16 @@ const Navbar = () => {
 
       <nav className={`fixed w-full z-50 text-white transition-all duration-300 ${scrolled ? 'bg-[rgba(90,14,122,0.62)] backdrop-blur-md border-b border-white/15 py-2' : 'bg-transparent py-4'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex-shrink-0">
-              <Image src="/logo.svg" alt="Go Seven" width={130} height={48} className="h-10 w-auto" priority />
+          <div className="flex min-h-[76px] items-center justify-between">
+            <Link href="/" className="flex flex-shrink-0 items-center">
+              <Image
+                src="/logo-go7-purple.png"
+                alt="Go Seven"
+                width={210}
+                height={121}
+                className="h-12 w-auto sm:h-14 md:h-16"
+                priority
+              />
             </Link>
 
             <div className="hidden md:flex ml-10 items-baseline space-x-8">
