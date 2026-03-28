@@ -95,6 +95,19 @@ function TShirt() {
     return texture;
   }, [smileTextureSource]);
 
+  const taglineTextureSource = useTexture('/tagline-embroidery.png');
+  const taglineTexture = useMemo(() => {
+    const texture = taglineTextureSource.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = 16;
+    texture.needsUpdate = true;
+    return texture;
+  }, [taglineTextureSource]);
+
   const printRoughnessTexture = useMemo(() => {
     const size = 256;
     const canvas = document.createElement('canvas');
@@ -134,8 +147,9 @@ function TShirt() {
   useEffect(() => {
     return () => {
       smileTexture.dispose();
+      taglineTexture.dispose();
     };
-  }, [smileTexture]);
+  }, [smileTexture, taglineTexture]);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
@@ -180,7 +194,24 @@ function TShirt() {
     return clone;
   }, [scene]);
 
-  // Slightly curved print plane so the artwork reads as fabric print, not a flat sticker.
+  // Slightly curved chest plane so the artwork reads as embroidered onto the fabric.
+  const chestPrintGeometry = useMemo(() => {
+    const geometry = new THREE.PlaneGeometry(0.88, 0.074, 120, 24);
+    const pos = geometry.attributes.position as THREE.BufferAttribute;
+
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const y = pos.getY(i);
+      const curveAcross = -Math.pow(Math.abs(x) / 0.44, 2) * 0.018;
+      const curveDown = -Math.pow(y / 0.037, 2) * 0.002;
+      pos.setZ(i, curveAcross + curveDown);
+    }
+
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+    return geometry;
+  }, []);
+
   const backPrintGeometry = useMemo(() => {
     const geometry = new THREE.PlaneGeometry(1.12, 0.33, 96, 24);
     const pos = geometry.attributes.position as THREE.BufferAttribute;
@@ -202,6 +233,31 @@ function TShirt() {
     <group ref={groupRef} position={SHIRT_POSITION} scale={1.45} dispose={null}>
       <group>
         <primitive object={shirtObject} />
+
+        {/* Center chest embroidery using the brand tagline from the logo. */}
+        <mesh
+          geometry={chestPrintGeometry}
+          position={[0, 0.16, 0.425]}
+          renderOrder={9}
+          frustumCulled={false}
+        >
+          <meshPhysicalMaterial
+            map={taglineTexture}
+            roughnessMap={printRoughnessTexture ?? undefined}
+            transparent
+            alphaTest={0.06}
+            opacity={0.97}
+            roughness={0.72}
+            metalness={0.01}
+            clearcoat={0.08}
+            clearcoatRoughness={0.86}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+            polygonOffset
+            polygonOffsetFactor={-6}
+            toneMapped
+          />
+        </mesh>
 
         {/* Joker smile print on shirt back */}
         <mesh
