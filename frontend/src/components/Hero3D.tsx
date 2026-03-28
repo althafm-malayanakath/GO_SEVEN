@@ -97,7 +97,33 @@ function TShirt() {
 
   const taglineTextureSource = useTexture('/tagline-embroidery.png');
   const taglineTexture = useMemo(() => {
-    const texture = taglineTextureSource.clone();
+    const img = taglineTextureSource.image as HTMLImageElement;
+    const W = img.naturalWidth || img.width;
+    const H = img.naturalHeight || img.height;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    const id = ctx.getImageData(0, 0, W, H);
+    const d = id.data;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        // Strip the top decorative bar
+        if (y < H * 0.08) { d[i + 3] = 0; continue; }
+        const lum = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+        // White/near-white background → fully transparent
+        if (lum > 228) {
+          d[i + 3] = 0;
+        } else if (lum > 190) {
+          // Smooth anti-aliased edges
+          d[i + 3] = Math.round(((228 - lum) / 38) * 255);
+        }
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
@@ -110,7 +136,29 @@ function TShirt() {
 
   const taglineBumpTextureSource = useTexture('/tagline-embroidery-bump.png');
   const taglineBumpTexture = useMemo(() => {
-    const texture = taglineBumpTextureSource.clone();
+    const img = taglineBumpTextureSource.image as HTMLImageElement;
+    const W = img.naturalWidth || img.width;
+    const H = img.naturalHeight || img.height;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    const id = ctx.getImageData(0, 0, W, H);
+    const d = id.data;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        // Strip top bar
+        if (y < H * 0.08) { d[i] = d[i + 1] = d[i + 2] = 0; continue; }
+        // Invert: white bg (lum≈255) → 0 (flat), dark text (lum≈80) → 175 (raised)
+        const lum = Math.round(d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114);
+        const inv = 255 - lum;
+        d[i] = d[i + 1] = d[i + 2] = inv;
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.LinearMipMapLinearFilter;
@@ -259,17 +307,19 @@ function TShirt() {
           <meshStandardMaterial
             map={taglineTexture}
             transparent
-            alphaTest={0.08}
-            opacity={0.99}
+            alphaTest={0.04}
+            opacity={0.94}
             bumpMap={taglineBumpTexture}
-            bumpScale={0.018}
+            bumpScale={0.075}
             roughnessMap={printRoughnessTexture ?? undefined}
-            roughness={0.96}
+            roughness={0.88}
             metalness={0}
+            emissive="#5a0090"
+            emissiveIntensity={0.03}
             side={THREE.FrontSide}
             depthWrite
             polygonOffset
-            polygonOffsetFactor={-1}
+            polygonOffsetFactor={-2}
             toneMapped
           />
         </mesh>
