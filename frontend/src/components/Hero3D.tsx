@@ -169,7 +169,7 @@ function TShirt() {
   useFrame(({ clock }) => {
     if (groupRef.current) {
       const t = clock.getElapsedTime();
-      groupRef.current.rotation.y = Math.PI + Math.sin(t * 0.55) * 0.14;
+      groupRef.current.rotation.y = Math.PI + t * 0.32;
       groupRef.current.position.y = -0.85 + Math.sin(t * 1.35) * 0.06;
     }
   });
