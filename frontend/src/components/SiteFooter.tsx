@@ -36,7 +36,7 @@ export default function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[auto_1fr_auto] lg:items-start">
           <div className="space-y-4">
-            <Image src="/logo-go7-purple.png" alt="Go Seven" width={180} height={104} className="h-12 w-auto" />
+            <Image src="/logo-go7-white.png" alt="Go Seven" width={220} height={127} className="h-14 w-auto sm:h-16" />
             <p className="max-w-sm text-sm text-white/60">
               {settings.footerSupportText}
             </p>
