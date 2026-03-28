@@ -108,6 +108,18 @@ function TShirt() {
     return texture;
   }, [taglineTextureSource]);
 
+  const taglineBumpTextureSource = useTexture('/tagline-embroidery-bump.png');
+  const taglineBumpTexture = useMemo(() => {
+    const texture = taglineBumpTextureSource.clone();
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = 16;
+    texture.needsUpdate = true;
+    return texture;
+  }, [taglineBumpTextureSource]);
+
   const printRoughnessTexture = useMemo(() => {
     const size = 256;
     const canvas = document.createElement('canvas');
@@ -148,8 +160,9 @@ function TShirt() {
     return () => {
       smileTexture.dispose();
       taglineTexture.dispose();
+      taglineBumpTexture.dispose();
     };
-  }, [smileTexture, taglineTexture]);
+  }, [smileTexture, taglineTexture, taglineBumpTexture]);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
@@ -196,15 +209,16 @@ function TShirt() {
 
   // Slightly curved chest plane so the artwork reads as embroidered onto the fabric.
   const chestPrintGeometry = useMemo(() => {
-    const geometry = new THREE.PlaneGeometry(0.88, 0.074, 120, 24);
+    const geometry = new THREE.PlaneGeometry(0.88, 0.074, 160, 32);
     const pos = geometry.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const y = pos.getY(i);
-      const curveAcross = -Math.pow(Math.abs(x) / 0.44, 2) * 0.018;
-      const curveDown = -Math.pow(y / 0.037, 2) * 0.002;
-      pos.setZ(i, curveAcross + curveDown);
+      const curveAcross = -Math.pow(Math.abs(x) / 0.44, 2) * 0.024;
+      const curveDown = -Math.pow(y / 0.037, 2) * 0.0024;
+      const chestSlope = -y * 0.012;
+      pos.setZ(i, curveAcross + curveDown + chestSlope);
     }
 
     pos.needsUpdate = true;
@@ -237,24 +251,25 @@ function TShirt() {
         {/* Center chest embroidery using the brand tagline from the logo. */}
         <mesh
           geometry={chestPrintGeometry}
-          position={[0, 0.16, 0.425]}
+          position={[0, 0.31, 0.394]}
+          rotation={[-0.035, 0, 0]}
           renderOrder={9}
           frustumCulled={false}
         >
-          <meshPhysicalMaterial
+          <meshStandardMaterial
             map={taglineTexture}
-            roughnessMap={printRoughnessTexture ?? undefined}
             transparent
-            alphaTest={0.06}
-            opacity={0.97}
-            roughness={0.72}
-            metalness={0.01}
-            clearcoat={0.08}
-            clearcoatRoughness={0.86}
-            side={THREE.DoubleSide}
-            depthWrite={false}
+            alphaTest={0.08}
+            opacity={0.99}
+            bumpMap={taglineBumpTexture}
+            bumpScale={0.018}
+            roughnessMap={printRoughnessTexture ?? undefined}
+            roughness={0.96}
+            metalness={0}
+            side={THREE.FrontSide}
+            depthWrite
             polygonOffset
-            polygonOffsetFactor={-6}
+            polygonOffsetFactor={-1}
             toneMapped
           />
         </mesh>
