@@ -95,41 +95,52 @@ function TShirt() {
     return texture;
   }, [smileTextureSource]);
 
-  // Left-chest logo: "go" (purple oval blob) + "SEVE" (gray) + "N" (purple)
-  // Matches the brand identity — generated entirely in canvas, no PNG needed.
+  // Center-chest logo: "go" (purple oval blob) + "SEVE" (gray) + "N" (purple)
+  // Content is measured first then centered in the canvas so nothing clips.
   const chestLogoTexture = useMemo(() => {
-    const W = 360, H = 140;
+    const W = 580, H = 168;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, W, H);
 
-    const PURPLE = '#9416F5'; // bold brand purple, visible on white fabric
-    const GRAY   = '#4A4A4A'; // dark enough to read on white shirt
+    const PURPLE = '#9416F5';
+    const GRAY   = '#484848';
+    const G_FONT    = 'bold 104px Arial, Helvetica, sans-serif';
+    const WORD_FONT = 'bold 62px Arial, Helvetica, sans-serif';
+    const OV_RX = 42, OV_RY = 50; // oval blob radii
+    const GAP1 = 10, GAP2 = 18;   // g→oval gap, oval→SEVEN gap
 
-    // "g" lowercase bold
-    ctx.fillStyle = PURPLE;
-    ctx.font = 'bold 90px Arial, Helvetica, sans-serif';
-    ctx.fillText('g', 5, 110);
+    // Measure everything to compute total width for centering
+    ctx.font = G_FONT;
     const gW = ctx.measureText('g').width;
+    ctx.font = WORD_FONT;
+    const seveW = ctx.measureText('SEVE').width;
+    const nW    = ctx.measureText('N').width;
+    const totalW = gW + GAP1 + OV_RX * 2 + GAP2 + seveW + nW;
+    const ox = (W - totalW) / 2; // horizontal offset to center
 
-    // Oval blob "o" — drawn as ellipse (matches logo's oversized "o" mark)
-    const ovalCX = 5 + gW + 8 + 30;
+    // "g" lowercase bold purple
+    ctx.font = G_FONT;
+    ctx.fillStyle = PURPLE;
+    ctx.fillText('g', ox, 132);
+
+    // Oval blob "o"
+    const ovalCX = ox + gW + GAP1 + OV_RX;
     ctx.beginPath();
-    ctx.ellipse(ovalCX, 72, 30, 36, 0, 0, Math.PI * 2);
+    ctx.ellipse(ovalCX, 82, OV_RX, OV_RY, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // "SEVE" in dark gray
-    ctx.font = 'bold 52px Arial, Helvetica, sans-serif';
-    const seveX = ovalCX + 30 + 14;
+    // "SEVE" in gray
+    ctx.font = WORD_FONT;
+    const seveX = ovalCX + OV_RX + GAP2;
     ctx.fillStyle = GRAY;
-    ctx.fillText('SEVE', seveX, 100);
-    const seveW = ctx.measureText('SEVE').width;
+    ctx.fillText('SEVE', seveX, 120);
 
-    // "N" in purple — mirrors "go" color, creates branded purple bookend
+    // "N" in purple — purple bookend matching "go"
     ctx.fillStyle = PURPLE;
-    ctx.fillText('N', seveX + seveW, 100);
+    ctx.fillText('N', seveX + seveW, 120);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -142,9 +153,9 @@ function TShirt() {
     return tex;
   }, []);
 
-  // Bump map: black bg = flat fabric, white = raised embroidery threads
+  // Bump map — identical layout, black bg = flat, white = raised thread
   const chestLogoBump = useMemo(() => {
-    const W = 360, H = 140;
+    const W = 580, H = 168;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
@@ -152,21 +163,32 @@ function TShirt() {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 90px Arial, Helvetica, sans-serif';
-    ctx.fillText('g', 5, 110);
-    const gW = ctx.measureText('g').width;
+    const G_FONT    = 'bold 104px Arial, Helvetica, sans-serif';
+    const WORD_FONT = 'bold 62px Arial, Helvetica, sans-serif';
+    const OV_RX = 42, OV_RY = 50;
+    const GAP1 = 10, GAP2 = 18;
 
-    const ovalCX = 5 + gW + 8 + 30;
+    ctx.font = G_FONT;
+    const gW = ctx.measureText('g').width;
+    ctx.font = WORD_FONT;
+    const seveW = ctx.measureText('SEVE').width;
+    const nW    = ctx.measureText('N').width;
+    const totalW = gW + GAP1 + OV_RX * 2 + GAP2 + seveW + nW;
+    const ox = (W - totalW) / 2;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = G_FONT;
+    ctx.fillText('g', ox, 132);
+
+    const ovalCX = ox + gW + GAP1 + OV_RX;
     ctx.beginPath();
-    ctx.ellipse(ovalCX, 72, 30, 36, 0, 0, Math.PI * 2);
+    ctx.ellipse(ovalCX, 82, OV_RX, OV_RY, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.font = 'bold 52px Arial, Helvetica, sans-serif';
-    const seveX = ovalCX + 30 + 14;
-    ctx.fillText('SEVE', seveX, 100);
-    const seveW = ctx.measureText('SEVE').width;
-    ctx.fillText('N', seveX + seveW, 100);
+    ctx.font = WORD_FONT;
+    const seveX = ovalCX + OV_RX + GAP2;
+    ctx.fillText('SEVE', seveX, 120);
+    ctx.fillText('N', seveX + seveW, 120);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.ClampToEdgeWrapping;
@@ -265,18 +287,18 @@ function TShirt() {
     return clone;
   }, [scene]);
 
-  // Small curved plane for the left-chest logo (360×140 canvas → ratio 2.57)
+  // Center-chest logo plane (580×168 canvas → ratio 3.45)
   const chestPrintGeometry = useMemo(() => {
-    const W = 0.27, H = W * (140 / 360); // preserves canvas aspect ratio
-    const geometry = new THREE.PlaneGeometry(W, H, 60, 24);
+    const W = 0.52, H = W * (168 / 580); // preserves canvas aspect ratio
+    const geometry = new THREE.PlaneGeometry(W, H, 100, 28);
     const pos = geometry.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const y = pos.getY(i);
-      const curveAcross = -Math.pow(Math.abs(x) / (W / 2), 2) * 0.007;
-      const curveDown   = -Math.pow(y / (H / 2), 2) * 0.001;
-      const chestSlope  = -y * 0.008;
+      const curveAcross = -Math.pow(Math.abs(x) / (W / 2), 2) * 0.018;
+      const curveDown   = -Math.pow(y / (H / 2), 2) * 0.002;
+      const chestSlope  = -y * 0.010;
       pos.setZ(i, curveAcross + curveDown + chestSlope);
     }
 
@@ -307,11 +329,11 @@ function TShirt() {
       <group>
         <primitive object={shirtObject} />
 
-        {/* Left-chest logo embroidery: "go SEVEN" brand mark */}
+        {/* Center-chest logo embroidery: "go SEVEN" brand mark */}
         <mesh
           geometry={chestPrintGeometry}
-          position={[-0.18, 0.35, 0.385]}
-          rotation={[-0.03, 0.06, 0]}
+          position={[0, 0.31, 0.394]}
+          rotation={[-0.035, 0, 0]}
           renderOrder={9}
           frustumCulled={false}
         >
