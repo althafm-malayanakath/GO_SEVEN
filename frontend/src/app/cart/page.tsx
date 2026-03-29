@@ -13,9 +13,7 @@ export default function CartPage() {
   const { items, removeItem, updateQty, updateVariant, totalItems, totalPrice, clearCart } = useCart();
   const { formatPrice } = useSettings();
 
-  const tax = totalPrice * 0.08;
-  const shipping = totalPrice > 150 ? 0 : 12.99;
-  const orderTotal = totalPrice + tax + shipping;
+  const orderTotal = totalPrice;
 
   if (items.length === 0) {
     return (
@@ -163,22 +161,13 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-black/60">Shipping</span>
-                  <span className="font-semibold">{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-black/60">Tax (8%)</span>
-                  <span className="font-semibold">{formatPrice(tax)}</span>
+                  <span className="font-semibold text-green-600">Free</span>
                 </div>
                 <div className="border-t border-purple-100 pt-3 flex justify-between font-bold text-base">
                   <span>Total</span>
                   <span className="text-primary">{formatPrice(orderTotal)}</span>
                 </div>
               </div>
-              {shipping > 0 && (
-                <p className="text-xs text-black/60 mb-4">
-                  Add {formatPrice(150 - totalPrice)} more for free shipping
-                </p>
-              )}
               <Link
                 href="/checkout"
                 className="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 rounded-full font-bold hover:bg-primary-dark transition-colors"
