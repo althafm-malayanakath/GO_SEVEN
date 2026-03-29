@@ -12,21 +12,13 @@ import { buildWhatsAppUrl } from '@/lib/whatsapp';
 
 const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
 export default function OrderPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isSuccess = searchParams.get('success') === 'true';
   const { id } = useParams<{ id: string }>();
   const { user, isReady, isAdmin } = useAuth();
-  const { settings } = useSettings();
+  const { settings, formatPrice } = useSettings();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -133,7 +125,7 @@ export default function OrderPage() {
 📌 *Order ID:* #${order._id.slice(-8).toUpperCase()}
 👤 *Customer:* ${order.customerName}
 📞 *Phone:* ${order.customerPhone}
-💰 *Total:* ${formatCurrency(order.totalPrice)}
+💰 *Total:* ${formatPrice(order.totalPrice)}
 
 📦 *Order Details:*${productSummary}
 📍 *Shipping Address:*
@@ -239,9 +231,9 @@ ${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippin
                           {item.color ? `Color: ${item.color}` : ''}
                         </p>
                       )}
-                      <p className="mt-1 text-sm text-white/70">Unit price: {formatCurrency(item.price)}</p>
+                      <p className="mt-1 text-sm text-white/70">Unit price: {formatPrice(item.price)}</p>
                     </div>
-                    <p className="text-lg font-black text-white">{formatCurrency(item.price * item.qty)}</p>
+                    <p className="text-lg font-black text-white">{formatPrice(item.price * item.qty)}</p>
                   </div>
                 ))}
               </div>
@@ -369,19 +361,19 @@ ${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippin
               <div className="mt-5 space-y-3 text-sm text-white/78">
                 <div className="flex items-center justify-between">
                   <span>Items</span>
-                  <span className="font-semibold text-white">{formatCurrency(order.itemsPrice ?? order.totalPrice)}</span>
+                  <span className="font-semibold text-white">{formatPrice(order.itemsPrice ?? order.totalPrice)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Shipping</span>
-                  <span className="font-semibold text-white">{formatCurrency(order.shippingPrice ?? 0)}</span>
+                  <span className="font-semibold text-white">{formatPrice(order.shippingPrice ?? 0)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Tax</span>
-                  <span className="font-semibold text-white">{formatCurrency(order.taxPrice ?? 0)}</span>
+                  <span className="font-semibold text-white">{formatPrice(order.taxPrice ?? 0)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-white/12 pt-3 text-base">
                   <span className="font-semibold text-white">Total</span>
-                  <span className="text-xl font-black text-white">{formatCurrency(order.totalPrice)}</span>
+                  <span className="text-xl font-black text-white">{formatPrice(order.totalPrice)}</span>
                 </div>
               </div>
             </section>

@@ -19,6 +19,7 @@ import {
 import ProductEditor from '@/components/admin/ProductEditor';
 import { Product, ProductInput, api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 
 type FilterMode = 'all' | 'featured' | 'new' | 'low-stock';
 
@@ -29,18 +30,11 @@ const FILTERS: Array<{ label: string; value: FilterMode }> = [
   { label: 'Low stock', value: 'low-stock' },
 ];
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
 export default function AdminProductsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAdmin, isReady } = useAuth();
+  const { formatPrice } = useSettings();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -389,7 +383,7 @@ export default function AdminProductsPage() {
 
                     <div className="mt-4 flex flex-wrap gap-3 text-sm">
                       <div className="rounded-full border border-white/16 bg-white/8 px-3 py-1.5">
-                        Price <span className="ml-2 font-bold text-white">{formatCurrency(product.price)}</span>
+                        Price <span className="ml-2 font-bold text-white">{formatPrice(product.price)}</span>
                       </div>
                       <div className="rounded-full border border-white/16 bg-white/8 px-3 py-1.5">
                         Stock <span className={`ml-2 font-bold ${product.stock <= 10 ? 'text-[#ffe9a8]' : 'text-white'}`}>{product.stock}</span>

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, CreditCard, PackageSearch, RefreshCcw, ShieldAlert, ShoppingBag, Truck } from 'lucide-react';
 import { Order, OrderStatus, api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 
 const STATUS_OPTIONS: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -18,18 +19,11 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   Cancelled: 'bg-[#ffd9dc] text-[#8e2330]',
 };
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
 export default function AdminOrdersPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAdmin, isReady } = useAuth();
+  const { formatPrice } = useSettings();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -205,7 +199,7 @@ export default function AdminOrdersPage() {
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/16">
                   <ShoppingBag size={20} />
                 </div>
-                <p className="text-2xl font-black">{formatCurrency(stats.revenue)}</p>
+                <p className="text-2xl font-black">{formatPrice(stats.revenue)}</p>
                 <p className="mt-1 text-sm text-white/72">Gross revenue</p>
               </div>
             </div>
@@ -273,7 +267,7 @@ export default function AdminOrdersPage() {
                       <div className="rounded-[22px] border border-white/12 bg-white/8 px-4 py-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/55">Order summary</p>
                         <p className="mt-2 font-semibold text-white">{order.orderItems.length} item(s)</p>
-                        <p className="text-sm text-white/70">{formatCurrency(order.totalPrice)}</p>
+                        <p className="text-sm text-white/70">{formatPrice(order.totalPrice)}</p>
                         <p className="text-sm text-white/70">
                           Customer WhatsApp: {order.notifications?.customer?.sent ? 'Sent' : order.notifications?.customer?.error || 'Pending'}
                         </p>

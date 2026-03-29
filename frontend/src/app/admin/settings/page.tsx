@@ -10,6 +10,7 @@ const CURRENCIES = [
   { code: 'EUR', symbol: '€', label: 'Euro' },
   { code: 'GBP', symbol: '£', label: 'British Pound' },
   { code: 'INR', symbol: '₹', label: 'Indian Rupee' },
+  { code: 'QAR', symbol: 'QAR ', label: 'Qatari Riyal' },
   { code: 'AED', symbol: 'AED ', label: 'UAE Dirham' },
   { code: 'SAR', symbol: 'SAR ', label: 'Saudi Riyal' },
   { code: 'SGD', symbol: 'S$', label: 'Singapore Dollar' },
