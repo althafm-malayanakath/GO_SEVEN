@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, BellRing, Check, CreditCard, PackageSearch, RefreshCcw, ShieldAlert, ShoppingBag, Trash2, Truck, X } from 'lucide-react';
+import { ArrowUpRight, Check, CreditCard, PackageSearch, RefreshCcw, ShieldAlert, ShoppingBag, Trash2, Truck } from 'lucide-react';
 import { Order, OrderStatus, api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -34,9 +34,6 @@ export default function AdminOrdersPage() {
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [newOrderToast, setNewOrderToast] = useState(false);
-  const knownOrderCount = useRef<number | null>(null);
-
   const loadOrders = useCallback(async (mode: 'initial' | 'refresh' = 'refresh') => {
     if (mode === 'initial') {
       setLoading(true);
@@ -47,7 +44,6 @@ export default function AdminOrdersPage() {
     try {
       const nextOrders = await api.getOrders();
       setOrders(nextOrders);
-      knownOrderCount.current = nextOrders.length;
       setPageError('');
     } catch (error) {
       setPageError(error instanceof Error ? error.message : 'Unable to load orders.');
@@ -71,28 +67,6 @@ export default function AdminOrdersPage() {
       void loadOrders('initial');
     }
   }, [isAdmin, isReady, loadOrders, pathname, router, user]);
-
-  // Poll every 30s for new orders and show a toast to the admin
-  useEffect(() => {
-    if (!isAdmin) return;
-
-    const tick = async () => {
-      try {
-        const nextOrders = await api.getOrders();
-        const prev = knownOrderCount.current;
-        if (prev !== null && nextOrders.length > prev) {
-          setNewOrderToast(true);
-          setOrders(nextOrders);
-        }
-        knownOrderCount.current = nextOrders.length;
-      } catch {
-        // silent — polling errors are non-critical
-      }
-    };
-
-    const interval = setInterval(() => { void tick(); }, 30_000);
-    return () => clearInterval(interval);
-  }, [isAdmin]);
 
   const stats = useMemo(() => ({
     total: orders.length,
@@ -145,7 +119,6 @@ export default function AdminOrdersPage() {
     try {
       await api.deleteOrder(idToDelete);
       setOrders((current) => current.filter((o) => o._id !== idToDelete));
-      knownOrderCount.current = Math.max(0, (knownOrderCount.current ?? 1) - 1);
     } catch (error) {
       setPageError(error instanceof Error ? error.message : 'Unable to delete order.');
     } finally {
@@ -390,33 +363,6 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       </div>
-
-      {/* New-order toast */}
-      <AnimatePresence>
-        {newOrderToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -16, x: 16 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            className="fixed top-24 right-6 z-50 flex items-center gap-3 rounded-2xl border border-purple-200/40 bg-white px-5 py-4 shadow-2xl text-black"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
-              <BellRing size={18} />
-            </div>
-            <div>
-              <p className="font-bold text-sm">New order received!</p>
-              <p className="text-xs text-black/55">The order list has been updated.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setNewOrderToast(false)}
-              className="ml-2 text-black/35 hover:text-black transition-colors"
-            >
-              <X size={16} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Delete confirmation dialog */}
       <AnimatePresence>
