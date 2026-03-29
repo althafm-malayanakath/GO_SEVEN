@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BellRing, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -18,7 +19,7 @@ export default function AdminOrderNotifier() {
   const triggerToast = useCallback(() => {
     setShowToast(true);
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setShowToast(false), 8000);
+    timerRef.current = setTimeout(() => setShowToast(false), 20_000);
   }, []);
 
   useEffect(() => () => {

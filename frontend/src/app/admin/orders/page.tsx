@@ -31,6 +31,7 @@ export default function AdminOrdersPage() {
   const [pageError, setPageError] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [statusDrafts, setStatusDrafts] = useState<Record<string, OrderStatus>>({});
+  const [markPaidConfirmId, setMarkPaidConfirmId] = useState<string | null>(null);
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -99,10 +100,13 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleMarkPaid = async (order: Order) => {
-    setMarkingPaidId(order._id);
+  const handleMarkPaidConfirm = async () => {
+    if (!markPaidConfirmId) return;
+    const idToMark = markPaidConfirmId;
+    setMarkPaidConfirmId(null);
+    setMarkingPaidId(idToMark);
     try {
-      const updatedOrder = await api.markOrderPaid(order._id);
+      const updatedOrder = await api.markOrderPaid(idToMark);
       setOrders((current) => current.map((o) => (o._id === updatedOrder._id ? updatedOrder : o)));
     } catch (error) {
       setPageError(error instanceof Error ? error.message : 'Unable to mark order as paid.');
@@ -340,7 +344,7 @@ export default function AdminOrdersPage() {
                       {!order.isPaid && (
                         <button
                           type="button"
-                          onClick={() => void handleMarkPaid(order)}
+                          onClick={() => setMarkPaidConfirmId(order._id)}
                           disabled={markingPaidId === order._id}
                           className="inline-flex items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
                         >
@@ -370,6 +374,49 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       </div>
+
+      {/* Mark as Paid confirmation dialog */}
+      <AnimatePresence>
+        {markPaidConfirmId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              className="w-full max-w-sm rounded-3xl bg-white p-8 text-black shadow-2xl"
+            >
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <Check size={24} />
+              </div>
+              <h3 className="text-xl font-black">Mark order as paid?</h3>
+              <p className="mt-2 text-sm text-black/60">
+                This will mark the order as paid. This action cannot be undone.
+              </p>
+              <div className="mt-7 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMarkPaidConfirmId(null)}
+                  className="flex-1 rounded-full border border-gray-200 py-3 font-semibold text-black transition-colors hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleMarkPaidConfirm()}
+                  className="flex-1 rounded-full bg-green-500 py-3 font-bold text-white transition-colors hover:bg-green-600"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Delete confirmation dialog */}
       <AnimatePresence>
