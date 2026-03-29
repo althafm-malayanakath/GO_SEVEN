@@ -235,9 +235,26 @@ const getMyOrders = async (req, res) => {
   res.json(orders);
 };
 
+// @desc    Delete order
+// @route   DELETE /api/orders/:id
+// @access  Private/Admin
+const deleteOrder = async (req, res) => {
+  validateObjectId(req.params.id, 'order');
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    throw createHttpError(404, 'Order not found');
+  }
+
+  await Order.deleteOne({ _id: order._id });
+  res.json({ message: 'Order deleted' });
+};
+
 module.exports = {
   ORDER_STATUSES,
   addOrderItems,
+  deleteOrder,
   getOrderById,
   getMyOrders,
   getOrders,

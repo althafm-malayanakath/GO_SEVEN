@@ -150,6 +150,17 @@ export const api = {
       body: JSON.stringify({ status }),
     }),
 
+  markOrderPaid: (id: string) =>
+    request<Order>(`/orders/${id}/pay`, {
+      method: 'PUT',
+      body: JSON.stringify({}),
+    }),
+
+  deleteOrder: (id: string) =>
+    request<{ message: string }>(`/orders/${id}`, {
+      method: 'DELETE',
+    }),
+
   // Reviews
   getReviews: (productId: string) =>
     request<ReviewsResponse>(`/products/${productId}/reviews`),
