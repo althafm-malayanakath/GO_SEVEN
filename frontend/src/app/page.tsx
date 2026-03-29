@@ -55,7 +55,7 @@ export default function HomePage() {
             <p className="text-lg text-white/88 mb-10 max-w-md">
               Premium embroidered pieces crafted with refined texture, precise detailing, and a luxury finish built to stand apart.
             </p>
-            <div className="mt-16 sm:mt-0 flex flex-col sm:flex-row gap-4">
+            <div className="mt-28 sm:mt-0 flex flex-col sm:flex-row gap-4">
               <Link
                 href="/collections"
                 className="inline-flex items-center justify-center gap-2 bg-white text-[#7A1FA2] px-8 py-4 rounded-full font-semibold hover:bg-[#f1deff] transition-colors"
