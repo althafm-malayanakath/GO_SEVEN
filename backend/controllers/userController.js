@@ -164,9 +164,29 @@ const updateUserProfile = async (req, res) => {
   res.json(serializeAuthUser(updatedUser));
 };
 
+// @desc    Update lastActiveAt for the logged-in user
+// @route   PUT /api/users/heartbeat
+// @access  Private
+const heartbeat = async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, { lastActiveAt: new Date() });
+  res.json({ ok: true });
+};
+
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private/Admin
+const getUsers = async (req, res) => {
+  const users = await User.find({})
+    .select('-password -addresses -wishlist')
+    .sort({ lastActiveAt: -1, createdAt: -1 });
+  res.json(users);
+};
+
 module.exports = {
   registerUser,
   authUser,
   getUserProfile,
   updateUserProfile,
+  heartbeat,
+  getUsers,
 };

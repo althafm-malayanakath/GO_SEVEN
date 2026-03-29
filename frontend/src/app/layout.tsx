@@ -10,6 +10,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import ClientCursor from "@/components/ClientCursor";
 import AdminOrderNotifier from "@/components/AdminOrderNotifier";
+import UserHeartbeat from "@/components/UserHeartbeat";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
                 <WhatsAppContactButton />
               </Suspense>
               <AdminOrderNotifier />
+              <UserHeartbeat />
               <main className="min-h-screen text-white">{children}</main>
               <SiteFooter />
             </CartProvider>

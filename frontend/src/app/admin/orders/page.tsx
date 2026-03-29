@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, Check, CreditCard, PackageSearch, RefreshCcw, ShieldAlert, ShoppingBag, Trash2, Truck } from 'lucide-react';
+import { ArrowUpRight, Check, CreditCard, PackageSearch, RefreshCcw, ShieldAlert, ShoppingBag, Trash2, Truck, Users } from 'lucide-react';
 import { Order, OrderStatus, api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -189,6 +189,13 @@ export default function AdminOrdersPage() {
                 >
                   <ShoppingBag size={18} />
                   Products
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  <Users size={18} />
+                  Users
                 </Link>
                 <button
                   type="button"

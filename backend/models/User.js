@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  lastActiveAt: {
+    type: Date,
+  },
   addresses: [{
     street: String,
     city: String,

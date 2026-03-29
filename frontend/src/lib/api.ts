@@ -102,6 +102,11 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  heartbeat: () =>
+    request<{ ok: boolean }>('/users/heartbeat', { method: 'PUT', body: JSON.stringify({}) }),
+
+  getUsers: () => request<AdminUser[]>('/users'),
+
   // Products
   getProducts: (params?: ProductQuery) => request<Product[]>(`/products${buildQuery(params)}`),
 
@@ -338,6 +343,17 @@ export interface ReviewsResponse {
   reviews: Review[];
   numReviews: number;
   rating: number;
+}
+
+export interface AdminUser {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  whatsappOptIn: boolean;
+  role: string;
+  lastActiveAt?: string;
+  createdAt: string;
 }
 
 export interface AppSettings {
