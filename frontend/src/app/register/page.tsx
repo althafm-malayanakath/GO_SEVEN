@@ -17,7 +17,7 @@ function RegisterContent() {
     phone: '',
     password: '',
     confirm: '',
-    whatsappOptIn: false,
+    whatsappOptIn: true,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
