@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CreditCard, CheckCircle2, MapPin, MessageCircle, Package, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Copy, CreditCard, CheckCircle2, ExternalLink, MapPin, MessageCircle, Package, ShieldCheck, Truck } from 'lucide-react';
 import { api, Order, OrderStatus } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -25,6 +25,7 @@ export default function OrderPage() {
   const [error, setError] = useState('');
   const [statusDraft, setStatusDraft] = useState<OrderStatus>('Pending');
   const [savingStatus, setSavingStatus] = useState(false);
+  const [copiedTracking, setCopiedTracking] = useState(false);
 
   useEffect(() => {
     if (!isReady) {
@@ -312,6 +313,49 @@ ${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippin
                 <p>{order.shippingAddress.country}</p>
               </div>
             </section>
+
+            {order.trackingId && (
+              <section className="rounded-[30px] border border-white/15 bg-white/10 p-6 backdrop-blur">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12">
+                    <Truck size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black">Tracking</h2>
+                    <p className="text-xs text-white/55 mt-0.5">Your shipment is on the way</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-white/12 bg-white/8 px-4 py-3 font-mono text-sm text-white break-all">
+                    {order.trackingId}
+                  </div>
+                  <div className="flex gap-2">
+                    <a
+                      href={`https://t.17track.net/en#nums=${order.trackingId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-accent"
+                    >
+                      <ExternalLink size={15} />
+                      Track Package
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(order.trackingId!).then(() => {
+                          setCopiedTracking(true);
+                          setTimeout(() => setCopiedTracking(false), 2000);
+                        });
+                      }}
+                      className="flex items-center justify-center gap-2 rounded-full border border-white/20 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                    >
+                      <Copy size={15} />
+                      {copiedTracking ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
 
             <section className="rounded-[30px] border border-white/15 bg-white/10 p-6 backdrop-blur">
               <div className="mb-4 flex items-center gap-3">

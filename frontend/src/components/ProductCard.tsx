@@ -8,6 +8,7 @@ import { ShoppingCart, Eye } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/lib/api';
 import { isDiscountActive, getEffectivePrice } from '@/lib/discount';
+import { getStockInfo, STOCK_BADGE_OVERLAY } from '@/lib/stock';
 import { useSettings } from '@/context/SettingsContext';
 import CountdownTimer from '@/components/CountdownTimer';
 
@@ -21,6 +22,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) =
   const { formatPrice } = useSettings();
   const [added, setAdded] = useState(false);
   const [discountActive, setDiscountActive] = useState(() => isDiscountActive(product));
+  const stockInfo = getStockInfo(product.stock);
+  const isOutOfStock = stockInfo.status === 'out';
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0]?.name || '');
@@ -68,6 +71,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) =
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+
+    if (isOutOfStock) {
+      return;
+    }
+
     addItem(product, 1, selectedSize || undefined, selectedColor || undefined);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -136,10 +144,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) =
 
         <div className="pointer-events-none absolute inset-0 z-30 hidden items-center justify-center gap-4 bg-black/30 opacity-0 transition-opacity duration-300 lg:flex lg:group-hover:opacity-100">
           <button
+            type="button"
             onClick={handleAddToCart}
-            aria-label={`Add ${product.name} to cart`}
-            className={`pointer-events-auto rounded-full p-3 shadow-lg transition-all active:scale-90 ${
-              added ? 'bg-green-500 text-white' : 'bg-white text-primary hover:bg-primary hover:text-white'
+            disabled={isOutOfStock}
+            aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+            className={`pointer-events-auto rounded-full p-3 shadow-lg transition-all ${
+              isOutOfStock
+                ? 'cursor-not-allowed bg-white/70 text-black/35'
+                : added
+                  ? 'bg-green-500 text-white active:scale-90'
+                  : 'bg-white text-primary hover:bg-primary hover:text-white active:scale-90'
             }`}
           >
             <ShoppingCart size={20} />
@@ -162,10 +176,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) =
             <Eye size={20} />
           </Link>
           <button
+            type="button"
             onClick={handleAddToCart}
-            aria-label={`Add ${product.name} to cart`}
-            className={`flex h-11 w-11 items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-transform active:scale-90 ${
-              added ? 'bg-green-500 text-white' : 'bg-white/95 text-primary'
+            disabled={isOutOfStock}
+            aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+            className={`flex h-11 w-11 items-center justify-center rounded-full shadow-lg backdrop-blur-sm ${
+              isOutOfStock
+                ? 'cursor-not-allowed bg-white/70 text-black/35'
+                : added
+                  ? 'bg-green-500 text-white transition-transform active:scale-90'
+                  : 'bg-white/95 text-primary transition-transform active:scale-90'
             }`}
           >
             <ShoppingCart size={20} />
@@ -184,6 +204,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) =
           {discountActive && (
             <span className="rounded-full bg-red-500 px-3 py-1 text-[10px] font-bold text-white shadow-sm">
               {product.discount}% OFF
+            </span>
+          )}
+          {stockInfo.show && (
+            <span className={`rounded-full px-3 py-1 text-[10px] font-bold shadow-sm ${STOCK_BADGE_OVERLAY[stockInfo.status]}`}>
+              {stockInfo.label}
             </span>
           )}
         </div>

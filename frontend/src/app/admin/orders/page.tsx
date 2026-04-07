@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, Check, CreditCard, PackageSearch, RefreshCcw, ShieldAlert, ShoppingBag, Trash2, Truck, Users } from 'lucide-react';
+import { ArrowUpRight, Check, CreditCard, PackageSearch, RefreshCcw, Scan, ShieldAlert, ShoppingBag, Trash2, Truck, Users } from 'lucide-react';
+import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { Order, OrderStatus, api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -35,6 +36,9 @@ export default function AdminOrdersPage() {
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [trackingDrafts, setTrackingDrafts] = useState<Record<string, string>>({});
+  const [savingTrackingId, setSavingTrackingId] = useState<string | null>(null);
+  const [scanningOrderId, setScanningOrderId] = useState<string | null>(null);
   const loadOrders = useCallback(async (mode: 'initial' | 'refresh' = 'refresh') => {
     if (mode === 'initial') {
       setLoading(true);
@@ -112,6 +116,24 @@ export default function AdminOrdersPage() {
       setPageError(error instanceof Error ? error.message : 'Unable to mark order as paid.');
     } finally {
       setMarkingPaidId(null);
+    }
+  };
+
+  const handleTrackingSave = async (order: Order) => {
+    const trackingId = (trackingDrafts[order._id] ?? order.trackingId ?? '').trim();
+    if (!trackingId) return;
+
+    setSavingTrackingId(order._id);
+    try {
+      const updatedOrder = await api.updateOrderTracking(order._id, trackingId);
+      setOrders((current) => current.map((o) => (o._id === updatedOrder._id ? updatedOrder : o)));
+      setTrackingDrafts((current) => { const next = { ...current }; delete next[order._id]; return next; });
+      setStatusDrafts((current) => { const next = { ...current }; delete next[order._id]; return next; });
+      setPageError('');
+    } catch (error) {
+      setPageError(error instanceof Error ? error.message : 'Unable to save tracking ID.');
+    } finally {
+      setSavingTrackingId(null);
     }
   };
 
@@ -362,6 +384,42 @@ export default function AdminOrdersPage() {
                         {deletingId === order._id ? 'Deleting...' : 'Delete order'}
                       </button>
                     </div>
+
+                    {/* Tracking ID — full-width row */}
+                    <div className="xl:col-span-3 border-t border-white/10 pt-4">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/55">
+                        Tracking ID {order.trackingId && <span className="ml-2 normal-case font-mono text-purple-300">({order.trackingId})</span>}
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={trackingDrafts[order._id] ?? (order.trackingId || '')}
+                          onChange={(e) => setTrackingDrafts((prev) => ({ ...prev, [order._id]: e.target.value }))}
+                          placeholder="Enter or scan tracking ID..."
+                          className="min-w-0 flex-1 rounded-full border border-white/18 bg-white/10 px-4 py-2.5 font-mono text-sm text-white placeholder-white/35 outline-none focus:border-white/35"
+                        />
+                        <button
+                          type="button"
+                          title="Scan barcode"
+                          onClick={() => setScanningOrderId(order._id)}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/18 bg-white/10 text-white transition-colors hover:bg-white/20"
+                        >
+                          <Scan size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleTrackingSave(order)}
+                          disabled={
+                            savingTrackingId === order._id ||
+                            !(trackingDrafts[order._id] ?? (order.trackingId || '')).trim() ||
+                            (trackingDrafts[order._id] ?? (order.trackingId || '')).trim() === (order.trackingId || '').trim()
+                          }
+                          className="shrink-0 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {savingTrackingId === order._id ? 'Saving...' : order.trackingId ? 'Update' : 'Save & Ship'}
+                        </button>
+                      </div>
+                    </div>
                   </motion.div>
                 );
               })
@@ -417,6 +475,17 @@ export default function AdminOrdersPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Barcode scanner modal */}
+      {scanningOrderId && (
+        <BarcodeScanner
+          onScan={(value) => {
+            setTrackingDrafts((prev) => ({ ...prev, [scanningOrderId]: value }));
+            setScanningOrderId(null);
+          }}
+          onClose={() => setScanningOrderId(null)}
+        />
+      )}
 
       {/* Delete confirmation dialog */}
       <AnimatePresence>

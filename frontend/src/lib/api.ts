@@ -161,6 +161,12 @@ export const api = {
       body: JSON.stringify({}),
     }),
 
+  updateOrderTracking: (id: string, trackingId: string) =>
+    request<Order>(`/orders/${id}/tracking`, {
+      method: 'PUT',
+      body: JSON.stringify({ trackingId }),
+    }),
+
   deleteOrder: (id: string) =>
     request<{ message: string }>(`/orders/${id}`, {
       method: 'DELETE',
@@ -308,6 +314,7 @@ export interface Order {
   isDelivered: boolean;
   deliveredAt?: string;
   status: string;
+  trackingId?: string;
   createdAt: string;
   user?: { _id?: string; name: string; email: string };
   notifications?: {

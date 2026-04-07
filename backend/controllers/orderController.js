@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 const { createHttpError } = require('../utils/httpError');
 const { isValidPhoneNumber, normalizePhoneNumber } = require('../utils/phone');
 const {
@@ -94,6 +95,20 @@ const assertOrderAccess = (order, user) => {
   }
 };
 
+// Restores stock for all items in an order (used on cancel/delete)
+const restoreStock = async (orderItems) => {
+  const stockMap = {};
+  for (const item of orderItems) {
+    const pid = String(item.product);
+    stockMap[pid] = (stockMap[pid] || 0) + item.qty;
+  }
+  await Promise.all(
+    Object.entries(stockMap).map(([pid, qty]) =>
+      Product.findByIdAndUpdate(pid, { $inc: { stock: qty } })
+    )
+  );
+};
+
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
@@ -123,6 +138,31 @@ const addOrderItems = async (req, res) => {
     throw createHttpError(400, 'Payment method is required');
   }
 
+  // --- Stock validation ---
+  const stockRequirements = {};
+  for (const item of normalizedOrderItems) {
+    const pid = String(item.product);
+    stockRequirements[pid] = (stockRequirements[pid] || 0) + item.qty;
+  }
+
+  const stockEntries = Object.entries(stockRequirements);
+  const stockProducts = await Promise.all(
+    stockEntries.map(([pid]) => Product.findById(pid).select('name stock'))
+  );
+
+  for (let i = 0; i < stockEntries.length; i++) {
+    const [, requiredQty] = stockEntries[i];
+    const product = stockProducts[i];
+    if (!product) {
+      throw createHttpError(404, 'One or more products in your order could not be found');
+    }
+    if (product.stock < requiredQty) {
+      const unit = product.stock === 1 ? 'unit' : 'units';
+      throw createHttpError(400, `"${product.name}" only has ${product.stock} ${unit} left. Please update your cart.`);
+    }
+  }
+  // -------------------------
+
   const order = new Order({
     orderItems: normalizedOrderItems,
     user: req.user._id,
@@ -138,6 +178,13 @@ const addOrderItems = async (req, res) => {
   });
 
   const createdOrder = await order.save();
+
+  // Deduct stock atomically after order is confirmed
+  await Promise.all(
+    stockEntries.map(([pid, qty]) =>
+      Product.findByIdAndUpdate(pid, { $inc: { stock: -qty } })
+    )
+  );
 
   const [customerNotification, adminNotification] = await Promise.all([
     notifyCustomerOrderPlaced(createdOrder),
@@ -218,6 +265,11 @@ const updateOrderStatus = async (req, res) => {
     throw createHttpError(400, `status must be one of: ${ORDER_STATUSES.join(', ')}`);
   }
 
+  // Restore stock when cancelling (only if not already cancelled)
+  if (nextStatus === 'Cancelled' && order.status !== 'Cancelled') {
+    await restoreStock(order.orderItems);
+  }
+
   order.status = nextStatus;
   order.isDelivered = nextStatus === 'Delivered';
   order.deliveredAt = nextStatus === 'Delivered' ? new Date() : undefined;
@@ -235,6 +287,33 @@ const getMyOrders = async (req, res) => {
   res.json(orders);
 };
 
+// @desc    Update order tracking ID (auto-sets status to Shipped)
+// @route   PUT /api/orders/:id/tracking
+// @access  Private/Admin
+const updateOrderTracking = async (req, res) => {
+  validateObjectId(req.params.id, 'order');
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    throw createHttpError(404, 'Order not found');
+  }
+
+  const trackingId = String(req.body?.trackingId || '').trim();
+
+  if (!trackingId) {
+    throw createHttpError(400, 'Tracking ID is required');
+  }
+
+  order.trackingId = trackingId;
+  order.status = 'Shipped';
+  order.isDelivered = false;
+
+  const updatedOrder = await order.save();
+  await updatedOrder.populate('user', 'name email');
+  res.json(updatedOrder);
+};
+
 // @desc    Delete order
 // @route   DELETE /api/orders/:id
 // @access  Private/Admin
@@ -245,6 +324,11 @@ const deleteOrder = async (req, res) => {
 
   if (!order) {
     throw createHttpError(404, 'Order not found');
+  }
+
+  // Restore stock unless already cancelled (cancellation already restored it)
+  if (order.status !== 'Cancelled') {
+    await restoreStock(order.orderItems);
   }
 
   await Order.deleteOne({ _id: order._id });
@@ -259,5 +343,6 @@ module.exports = {
   getMyOrders,
   getOrders,
   updateOrderStatus,
+  updateOrderTracking,
   updateOrderToPaid,
 };

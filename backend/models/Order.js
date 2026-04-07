@@ -92,6 +92,10 @@ const orderSchema = new mongoose.Schema({
     enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending'
   },
+  trackingId: {
+    type: String,
+    trim: true,
+  },
   notifications: {
     customer: {
       attempted: { type: Boolean, default: false },
