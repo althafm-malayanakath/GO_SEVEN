@@ -4,12 +4,14 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Package, User, LogOut, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, LogOut, Package, ShieldCheck, Truck, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { api, Order } from '@/lib/api';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function AccountPage() {
   const { user, logout, isAdmin, isReady } = useAuth();
+  const { formatPrice } = useSettings();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +42,8 @@ export default function AccountPage() {
     logout();
     router.push('/');
   };
+
+  const getTrackingUrl = (trackingId: string) => `https://t.17track.net/en#nums=${encodeURIComponent(trackingId)}`;
 
   if (!isReady) {
     return (
@@ -149,22 +153,58 @@ export default function AccountPage() {
         ) : orders.length > 0 ? (
           <div className="space-y-4">
             {orders.map((order) => (
-              <Link
+              <div
                 key={order._id}
-                href={`/orders/${order._id}`}
-                className="flex items-center justify-between p-5 rounded-2xl border border-purple-200/80 bg-white text-black hover:border-primary transition-colors"
+                className="rounded-2xl border border-purple-200/80 bg-white p-5 text-black transition-colors hover:border-primary"
               >
-                <div>
-                  <p className="font-bold text-sm">#{order._id.slice(-8).toUpperCase()}</p>
-                  <p className="text-xs text-black/50 mt-0.5">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm">#{order._id.slice(-8).toUpperCase()}</p>
+                    <p className="mt-0.5 text-xs text-black/50">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+
+                    {order.trackingId && (
+                      <div className="mt-3 rounded-2xl border border-purple-200/80 bg-purple-50 px-3 py-2">
+                        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+                          <Truck size={13} />
+                          Tracking ID
+                        </div>
+                        <p className="mt-1 break-all font-mono text-sm text-black/75">{order.trackingId}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col items-start gap-2 sm:items-end">
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                      {order.status}
+                    </span>
+                    <p className="font-extrabold text-primary">{formatPrice(order.totalPrice)}</p>
+                  </div>
                 </div>
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                  {order.status}
-                </span>
-                <p className="font-extrabold text-primary">${order.totalPrice.toFixed(2)}</p>
-              </Link>
+
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <Link
+                    href={`/orders/${order._id}`}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-purple-200 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-purple-50"
+                  >
+                    View details
+                    <ArrowUpRight size={16} />
+                  </Link>
+
+                  {order.trackingId && (
+                    <a
+                      href={getTrackingUrl(order.trackingId)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/85"
+                    >
+                      <Truck size={16} />
+                      Track package
+                    </a>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         ) : (

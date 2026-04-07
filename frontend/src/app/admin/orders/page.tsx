@@ -308,13 +308,13 @@ export default function AdminOrdersPage() {
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">Customer</p>
                           <p className="mt-2 font-semibold text-white">{order.customerName || order.user?.name || 'Unknown customer'}</p>
-                          <p className="text-sm text-white/70">{order.user?.email || 'No email available'}</p>
-                          <p className="text-sm text-white/70">{order.customerPhone}</p>
+                          <p className="break-all text-sm text-white/70">{order.user?.email || 'No email available'}</p>
+                          <p className="break-all text-sm text-white/70">{order.customerPhone}</p>
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">Shipping</p>
-                          <p className="mt-2 text-sm text-white/78">{order.shippingAddress.address}</p>
-                          <p className="text-sm text-white/70">
+                          <p className="mt-2 break-words text-sm text-white/78">{order.shippingAddress.address}</p>
+                          <p className="break-words text-sm text-white/70">
                             {order.shippingAddress.city}, {order.shippingAddress.postalCode}, {order.shippingAddress.country}
                           </p>
                         </div>
@@ -336,11 +336,11 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 xl:w-56">
+                    <div className="flex min-w-0 flex-col gap-3 xl:w-56">
                       <select
                         value={selectedStatus}
                         onChange={(event) => updateStatusDraft(order._id, event.target.value as OrderStatus)}
-                        className="rounded-full border border-white/18 bg-white/10 px-4 py-3 text-sm font-semibold text-white outline-none transition-colors focus:border-white/35"
+                        className="w-full rounded-full border border-white/18 bg-white/10 px-4 py-3 text-sm font-semibold text-white outline-none transition-colors focus:border-white/35"
                       >
                         {STATUS_OPTIONS.map((status) => (
                           <option key={status} value={status} className="text-black">
@@ -352,13 +352,13 @@ export default function AdminOrdersPage() {
                         type="button"
                         onClick={() => void handleStatusSave(order)}
                         disabled={savingId === order._id || selectedStatus === order.status}
-                        className="inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-bold text-primary transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex w-full items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-bold text-primary transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {savingId === order._id ? 'Saving...' : 'Save status'}
                       </button>
                       <Link
                         href={`/orders/${order._id}`}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-white/18 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/18 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
                       >
                         View details
                         <ArrowUpRight size={16} />
@@ -368,7 +368,7 @@ export default function AdminOrdersPage() {
                           type="button"
                           onClick={() => setMarkPaidConfirmId(order._id)}
                           disabled={markingPaidId === order._id}
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Check size={15} />
                           {markingPaidId === order._id ? 'Saving...' : 'Mark as Paid'}
@@ -378,7 +378,7 @@ export default function AdminOrdersPage() {
                         type="button"
                         onClick={() => setDeleteConfirmId(order._id)}
                         disabled={deletingId === order._id}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <Trash2 size={15} />
                         {deletingId === order._id ? 'Deleting...' : 'Delete order'}
@@ -387,25 +387,28 @@ export default function AdminOrdersPage() {
 
                     {/* Tracking ID — full-width row */}
                     <div className="xl:col-span-3 border-t border-white/10 pt-4">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/55">
-                        Tracking ID {order.trackingId && <span className="ml-2 normal-case font-mono text-purple-300">({order.trackingId})</span>}
-                      </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={trackingDrafts[order._id] ?? (order.trackingId || '')}
-                          onChange={(e) => setTrackingDrafts((prev) => ({ ...prev, [order._id]: e.target.value }))}
-                          placeholder="Enter or scan tracking ID..."
-                          className="min-w-0 flex-1 rounded-full border border-white/18 bg-white/10 px-4 py-2.5 font-mono text-sm text-white placeholder-white/35 outline-none focus:border-white/35"
-                        />
-                        <button
-                          type="button"
-                          title="Scan barcode"
-                          onClick={() => setScanningOrderId(order._id)}
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/18 bg-white/10 text-white transition-colors hover:bg-white/20"
-                        >
-                          <Scan size={16} />
-                        </button>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/55">Tracking ID</p>
+                      {order.trackingId && (
+                        <p className="mt-2 break-all font-mono text-sm text-purple-300">{order.trackingId}</p>
+                      )}
+                      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <div className="flex min-w-0 flex-1 gap-2">
+                          <input
+                            type="text"
+                            value={trackingDrafts[order._id] ?? (order.trackingId || '')}
+                            onChange={(e) => setTrackingDrafts((prev) => ({ ...prev, [order._id]: e.target.value }))}
+                            placeholder="Enter or scan tracking ID..."
+                            className="min-w-0 flex-1 rounded-full border border-white/18 bg-white/10 px-4 py-2.5 font-mono text-sm text-white placeholder-white/35 outline-none focus:border-white/35"
+                          />
+                          <button
+                            type="button"
+                            title="Scan barcode"
+                            onClick={() => setScanningOrderId(order._id)}
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/18 bg-white/10 text-white transition-colors hover:bg-white/20"
+                          >
+                            <Scan size={16} />
+                          </button>
+                        </div>
                         <button
                           type="button"
                           onClick={() => void handleTrackingSave(order)}
@@ -414,7 +417,7 @@ export default function AdminOrdersPage() {
                             !(trackingDrafts[order._id] ?? (order.trackingId || '')).trim() ||
                             (trackingDrafts[order._id] ?? (order.trackingId || '')).trim() === (order.trackingId || '').trim()
                           }
-                          className="shrink-0 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="w-full rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                         >
                           {savingTrackingId === order._id ? 'Saving...' : order.trackingId ? 'Update' : 'Save & Ship'}
                         </button>
