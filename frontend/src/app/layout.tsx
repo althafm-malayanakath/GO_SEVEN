@@ -11,6 +11,7 @@ import { SettingsProvider } from "@/context/SettingsContext";
 import ClientCursor from "@/components/ClientCursor";
 import AdminOrderNotifier from "@/components/AdminOrderNotifier";
 import UserHeartbeat from "@/components/UserHeartbeat";
+import SmoothScroll from "@/components/SmoothScroll";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,23 +48,25 @@ export default function RootLayout({
         <link rel="preload" href="/joker_smile_1k.webp" as="fetch" crossOrigin="anonymous" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased cursor-none`}>
-        <ClientCursor />
-        <AuthProvider>
-          <SettingsProvider>
-            <CartProvider>
-              <Suspense fallback={null}>
-                <Navbar />
-              </Suspense>
-              <Suspense fallback={null}>
-                <WhatsAppContactButton />
-              </Suspense>
-              <AdminOrderNotifier />
-              <UserHeartbeat />
-              <main className="min-h-screen text-white">{children}</main>
-              <SiteFooter />
-            </CartProvider>
-          </SettingsProvider>
-        </AuthProvider>
+        <SmoothScroll>
+          <ClientCursor />
+          <AuthProvider>
+            <SettingsProvider>
+              <CartProvider>
+                <Suspense fallback={null}>
+                  <Navbar />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <WhatsAppContactButton />
+                </Suspense>
+                <AdminOrderNotifier />
+                <UserHeartbeat />
+                <main className="min-h-screen text-white">{children}</main>
+                <SiteFooter />
+              </CartProvider>
+            </SettingsProvider>
+          </AuthProvider>
+        </SmoothScroll>
       </body>
     </html>
   );
