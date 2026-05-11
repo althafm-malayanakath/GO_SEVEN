@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Shield, Truck } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import ProductCard from '@/components/ProductCard';
-import Hero3D from '@/components/Hero3D';
 import { api, Product } from '@/lib/api';
+
+const Hero3D = dynamic(() => import('@/components/Hero3D'), { ssr: false });
 
 const FEATURES = [
   { icon: Zap, title: 'Premium Quality', desc: 'Every piece crafted with the finest materials' },

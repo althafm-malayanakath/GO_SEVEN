@@ -83,7 +83,7 @@ function TShirt() {
   const { scene } = useGLTF('/shirt_baked.glb');
 
   const [smileTextureSource, chestLogoTextureSource, chestLogoBumpSource] = useTexture([
-    '/joker_smile_no_bg_2k.png',
+    '/joker_smile_1k.webp',
     '/hero-chest-logo.png',
     '/hero-chest-logo-bump.png',
   ]);
@@ -94,7 +94,7 @@ function TShirt() {
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.LinearMipMapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
-    texture.anisotropy = 16;
+    texture.anisotropy = 4;
     texture.needsUpdate = true;
     return texture;
   }, [smileTextureSource]);
@@ -106,7 +106,7 @@ function TShirt() {
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.LinearMipMapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
-    texture.anisotropy = 16;
+    texture.anisotropy = 4;
     texture.needsUpdate = true;
     return texture;
   }, [chestLogoTextureSource]);
@@ -117,44 +117,22 @@ function TShirt() {
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.LinearMipMapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
-    texture.anisotropy = 16;
+    texture.anisotropy = 4;
     texture.needsUpdate = true;
     return texture;
   }, [chestLogoBumpSource]);
 
   const printRoughnessTexture = useMemo(() => {
-    const size = 256;
     const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = 4;
+    canvas.height = 4;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
-
     ctx.fillStyle = '#9e9e9e';
-    ctx.fillRect(0, 0, size, size);
-
-    for (let i = 0; i < 280; i++) {
-      const x = pseudoRandom(i * 7 + 1) * size;
-      const y = pseudoRandom(i * 7 + 2) * size;
-      const len = 6 + pseudoRandom(i * 7 + 3) * 22;
-      const ang = pseudoRandom(i * 7 + 4) * Math.PI * 2;
-      const x2 = x + Math.cos(ang) * len;
-      const y2 = y + Math.sin(ang) * len;
-      const alpha = 0.08 + pseudoRandom(i * 7 + 5) * 0.15;
-      ctx.strokeStyle = `rgba(40, 40, 40, ${alpha})`;
-      ctx.lineWidth = 0.7 + pseudoRandom(i * 7 + 6) * 1.2;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-
+    ctx.fillRect(0, 0, 4, 4);
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3.5, 1.6);
-    tex.minFilter = THREE.LinearMipMapLinearFilter;
-    tex.magFilter = THREE.LinearFilter;
     return tex;
   }, []);
 
@@ -212,7 +190,7 @@ function TShirt() {
   // Chest logo plane sized for the full wordmark so it stays readable.
   const chestPrintGeometry = useMemo(() => {
     const W = 0.64, H = W * (620 / 2200);
-    const geometry = new THREE.PlaneGeometry(W, H, 120, 24);
+    const geometry = new THREE.PlaneGeometry(W, H, 32, 8);
     const pos = geometry.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
@@ -230,7 +208,7 @@ function TShirt() {
   }, []);
 
   const backPrintGeometry = useMemo(() => {
-    const geometry = new THREE.PlaneGeometry(1.12, 0.33, 96, 24);
+    const geometry = new THREE.PlaneGeometry(1.12, 0.33, 32, 8);
     const pos = geometry.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
