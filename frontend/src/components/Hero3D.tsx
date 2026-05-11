@@ -301,7 +301,7 @@ export default function Hero3D() {
         gl={{ antialias: true, alpha: true }}
         camera={{ position: [0, 0, 5], fov: 40 }}
         onCreated={({ gl }) => {
-          gl.setClearColor(0, 0, 0, 0);
+          gl.setClearColor(0x000000, 0);
           setReady(true);
         }}
       >
