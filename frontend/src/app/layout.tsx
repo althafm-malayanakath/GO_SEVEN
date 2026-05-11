@@ -42,6 +42,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" href="/shirt_baked.glb" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/joker_smile_1k.webp" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased cursor-none`}>
         <ClientCursor />
         <AuthProvider>

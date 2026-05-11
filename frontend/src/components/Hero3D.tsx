@@ -27,14 +27,7 @@ class CanvasErrorBoundary extends Component<CanvasErrorBoundaryProps, CanvasErro
   }
 
   override render() {
-    if (this.state.hasError) {
-      return (
-        <mesh position={SHIRT_POSITION}>
-          <boxGeometry args={[0.85, 1.1, 0.35]} />
-          <meshStandardMaterial color="#f3f4f6" />
-        </mesh>
-      );
-    }
+    if (this.state.hasError) return null;
     return this.props.children;
   }
 }
@@ -315,14 +308,7 @@ export default function Hero3D() {
         <Particles />
 
         <CanvasErrorBoundary>
-          <Suspense
-            fallback={
-              <mesh position={SHIRT_POSITION}>
-                <boxGeometry args={[0.85, 1.1, 0.35]} />
-                <meshStandardMaterial color="#f3f4f6" />
-              </mesh>
-            }
-          >
+          <Suspense fallback={null}>
             <Float speed={2.0} rotationIntensity={0.34} floatIntensity={0.42}>
               <TShirt />
             </Float>

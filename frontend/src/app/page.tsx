@@ -1,12 +1,9 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowRight, Zap, Shield, Truck } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { ArrowRight, Zap, Shield, Truck } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import { api, Product } from '@/lib/api';
+import { FadeIn, FadeInView } from '@/components/FadeIn';
+import type { Product } from '@/lib/api';
 
 const Hero3D = dynamic(() => import('@/components/Hero3D'), { ssr: false });
 
@@ -16,26 +13,21 @@ const FEATURES = [
   { icon: Truck, title: 'Fast Delivery', desc: 'Free shipping on all orders' },
 ];
 
-export default function HomePage() {
-  const [featured, setFeatured] = useState<Product[]>([]);
-  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
+async function getProducts(): Promise<Product[]> {
+  try {
+    const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api';
+    const res = await fetch(`${base}/products`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
 
-  useEffect(() => {
-    api.getProducts()
-      .then((products) => {
-        setFeatured(products.filter((p) => p.isFeatured).slice(0, 4));
-        setNewArrivals(products.filter((p) => p.isNewArrival).slice(0, 4));
-        setLoadError('');
-      })
-      .catch((error) => {
-        setFeatured([]);
-        setNewArrivals([]);
-        setLoadError(error instanceof Error ? error.message : 'Unable to load products right now.');
-      })
-      .finally(() => setLoading(false));
-  }, []);
+export default async function HomePage() {
+  const products = await getProducts();
+  const featured = products.filter((p) => p.isFeatured).slice(0, 4);
+  const newArrivals = products.filter((p) => p.isNewArrival).slice(0, 4);
 
   return (
     <div className="min-h-screen">
@@ -43,12 +35,7 @@ export default function HomePage() {
       <section className="relative min-h-[620px] md:min-h-screen overflow-hidden">
         <Hero3D />
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-32 min-h-[620px] md:min-h-screen flex items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl"
-          >
+          <FadeIn className="max-w-2xl">
             <h1 className="text-5xl sm:text-7xl font-black tracking-tight leading-none mb-6">
               <span className="text-gradient">STITCHED TO</span>
               <br />
@@ -71,7 +58,7 @@ export default function HomePage() {
                 New Arrivals
               </Link>
             </div>
-          </motion.div>
+          </FadeIn>
         </div>
       </section>
 
@@ -80,21 +67,17 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <motion.div
-                key={title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="flex items-start gap-4"
-              >
-                <div className="p-3 rounded-xl bg-white/12">
-                  <Icon size={24} className="text-white" />
+              <FadeInView key={title}>
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl bg-white/12">
+                    <Icon size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{title}</h3>
+                    <p className="text-white/75 text-sm mt-1">{desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg">{title}</h3>
-                  <p className="text-white/75 text-sm mt-1">{desc}</p>
-                </div>
-              </motion.div>
+              </FadeInView>
             ))}
           </div>
         </div>
@@ -113,24 +96,13 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-64 rounded-2xl bg-white/14 animate-pulse" />
-              ))}
-            </div>
-          ) : featured.length > 0 ? (
+          {featured.length > 0 ? (
             <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {featured.map((p) => (
                 <div key={p._id}>
                   <ProductCard product={p} compact />
                 </div>
               ))}
-            </div>
-          ) : loadError ? (
-            <div className="rounded-3xl border border-white/12 bg-white/6 px-6 py-10 text-center text-white/72">
-              <p className="text-lg font-semibold text-white">Unable to load featured products</p>
-              <p className="mt-2 text-sm">{loadError}</p>
             </div>
           ) : (
             <div className="text-center py-20 text-white/60">
@@ -167,11 +139,7 @@ export default function HomePage() {
       {/* CTA Banner */}
       <section className="py-32 bg-transparent text-white">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
+          <FadeInView scale>
             <h2 className="text-5xl font-black mb-6">Join the Movement</h2>
             <p className="text-white/80 text-lg mb-10">
               Sign up and get early access to exclusive drops, limited editions and members-only pricing.
@@ -182,11 +150,9 @@ export default function HomePage() {
             >
               Create Account <ArrowRight size={18} />
             </Link>
-          </motion.div>
+          </FadeInView>
         </div>
       </section>
-
     </div>
   );
 }
-
