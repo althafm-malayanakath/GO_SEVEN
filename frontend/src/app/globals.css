@@ -24,7 +24,7 @@ body {
   background: var(--brand-bg-main);
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
   background-attachment: fixed;
 }
