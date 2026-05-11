@@ -312,10 +312,9 @@ export default function Hero3D() {
             <Float speed={2.0} rotationIntensity={0.34} floatIntensity={0.42}>
               <TShirt />
             </Float>
+            <ContactShadows position={SHADOW_POSITION} opacity={0.34} scale={6} blur={2.2} far={4} />
           </Suspense>
         </CanvasErrorBoundary>
-
-        <ContactShadows position={SHADOW_POSITION} opacity={0.34} scale={6} blur={2.2} far={4} />
       </Canvas>
     </div>
   );
