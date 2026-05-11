@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useEffect, Suspense, Component, type ReactNode } from 'react';
+import { useMemo, useRef, useEffect, useState, Suspense, Component, type ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Float, ContactShadows, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -283,6 +283,8 @@ function TShirt() {
 }
 
 export default function Hero3D() {
+  const [ready, setReady] = useState(false);
+
   return (
     <div
       className="w-full h-[600px] md:h-screen absolute top-0 left-0 pointer-events-none"
@@ -293,11 +295,15 @@ export default function Hero3D() {
     >
       <Canvas
         className="absolute inset-0"
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity 0.5s ease' }}
         shadows={{ type: THREE.PCFShadowMap }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
         camera={{ position: [0, 0, 5], fov: 40 }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0, 0, 0, 0);
+          setReady(true);
+        }}
       >
         <ambientLight intensity={0.52} />
         <directionalLight position={[3.5, 5.2, 6]} intensity={1.22} castShadow />
