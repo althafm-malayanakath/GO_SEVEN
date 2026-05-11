@@ -1,11 +1,9 @@
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { ArrowRight, Zap, Shield, Truck } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { FadeIn, FadeInView } from '@/components/FadeIn';
 import type { Product } from '@/lib/api';
-
-const Hero3D = dynamic(() => import('@/components/Hero3D'), { ssr: false });
+import Hero3D from '@/components/Hero3DWrapper';
 
 const FEATURES = [
   { icon: Zap, title: 'Premium Quality', desc: 'Every piece crafted with the finest materials' },
