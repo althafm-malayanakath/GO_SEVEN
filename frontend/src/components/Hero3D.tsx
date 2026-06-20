@@ -1,5 +1,18 @@
 'use client';
 
+// Disable createImageBitmap on mobile devices to prevent textures rendering as solid black boxes
+// (due to buggy/inconsistent ImageBitmapLoader implementations in mobile WebKit/Blink browsers)
+if (typeof window !== 'undefined') {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile && typeof window.createImageBitmap !== 'undefined') {
+    try {
+      (window as any).createImageBitmap = undefined;
+    } catch (e) {
+      console.warn('Failed to disable window.createImageBitmap:', e);
+    }
+  }
+}
+
 import { useMemo, useRef, useEffect, useState, Suspense, Component, type ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Float, ContactShadows, useTexture } from '@react-three/drei';
@@ -115,20 +128,6 @@ function TShirt() {
     return texture;
   }, [chestLogoBumpSource]);
 
-  const printRoughnessTexture = useMemo(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 4;
-    canvas.height = 4;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    ctx.fillStyle = '#9e9e9e';
-    ctx.fillRect(0, 0, 4, 4);
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    return tex;
-  }, []);
-
   useEffect(() => {
     return () => {
       smileTexture.dispose();
@@ -237,8 +236,7 @@ function TShirt() {
             opacity={0.95}
             bumpMap={chestLogoBump}
             bumpScale={0.05}
-            roughnessMap={printRoughnessTexture ?? undefined}
-            roughness={0.88}
+            roughness={0.55}
             metalness={0}
             emissive="#53008a"
             emissiveIntensity={0.02}
@@ -260,11 +258,10 @@ function TShirt() {
         >
           <meshPhysicalMaterial
             map={smileTexture}
-            roughnessMap={printRoughnessTexture ?? undefined}
             transparent
             alphaTest={0.08}
             opacity={0.94}
-            roughness={0.56}
+            roughness={0.35}
             metalness={0.02}
             clearcoat={0.24}
             clearcoatRoughness={0.62}
