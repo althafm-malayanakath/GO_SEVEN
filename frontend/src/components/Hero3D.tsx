@@ -99,8 +99,9 @@ function TShirt() {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
     texture.anisotropy = 4;
     texture.needsUpdate = true;
     return texture;
@@ -111,8 +112,9 @@ function TShirt() {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
     texture.anisotropy = 4;
     texture.needsUpdate = true;
     return texture;
@@ -122,8 +124,9 @@ function TShirt() {
     const texture = chestLogoBumpSource.clone();
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
     texture.anisotropy = 4;
     texture.needsUpdate = true;
     return texture;
@@ -235,12 +238,8 @@ function TShirt() {
             transparent
             alphaTest={0.02}
             opacity={0.95}
-            bumpMap={chestLogoBump}
-            bumpScale={0.05}
-            roughness={0.55}
+            roughness={0.6}
             metalness={0}
-            emissive="#53008a"
-            emissiveIntensity={0.02}
             side={THREE.FrontSide}
             depthWrite
             polygonOffset
@@ -257,21 +256,17 @@ function TShirt() {
           renderOrder={9}
           frustumCulled={false}
         >
-          <meshPhysicalMaterial
+          <meshStandardMaterial
             map={smileTexture}
             transparent
             alphaTest={0.08}
             opacity={0.94}
-            roughness={0.35}
-            metalness={0.02}
-            clearcoat={0.24}
-            clearcoatRoughness={0.62}
+            roughness={0.4}
+            metalness={0}
             side={THREE.DoubleSide}
             depthWrite={false}
             polygonOffset
             polygonOffsetFactor={-6}
-            emissive="#2b0007"
-            emissiveIntensity={0.03}
             toneMapped
           />
         </mesh>
