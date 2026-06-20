@@ -3,8 +3,9 @@
 // Disable createImageBitmap on mobile devices to prevent textures rendering as solid black boxes
 // (due to buggy/inconsistent ImageBitmapLoader implementations in mobile WebKit/Blink browsers)
 if (typeof window !== 'undefined') {
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if (isMobile && typeof window.createImageBitmap !== 'undefined') {
+  // Disable createImageBitmap globally to prevent solid black texture rendering bugs
+  // on mobile devices (iOS Safari and Android Chrome), even when requested in Desktop Mode.
+  if (typeof window.createImageBitmap !== 'undefined') {
     try {
       (window as any).createImageBitmap = undefined;
     } catch (e) {
